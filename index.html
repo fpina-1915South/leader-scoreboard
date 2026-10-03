@@ -847,6 +847,27 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .glist{margin:2px 0 10px;padding-left:20px;}
 .glist li{font-size:13px;line-height:1.5;color:var(--body);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
+.nowblk.leftb{background:var(--ice);border:1px solid #BFD9E3;border-radius:10px;padding:9px 10px 7px;margin-top:8px;}
+.nowblk.leftb h4{color:var(--navy);margin:0 0 6px;font-size:12px;letter-spacing:.4px;text-transform:uppercase;}
+.nowrow.lf{display:flex;align-items:center;justify-content:space-between;width:100%;
+  min-height:46px;padding:7px 10px;margin:0 0 6px;background:#fff;border:1px solid #CFE2EA;
+  border-radius:9px;text-align:left;cursor:pointer;}
+.nowrow.lf span{display:block;font-size:13.5px;font-weight:700;color:var(--navy);line-height:1.25;}
+.nowrow.lf em{display:block;font-style:normal;font-size:11px;font-weight:600;color:#7A8C94;
+  letter-spacing:.3px;text-transform:uppercase;margin-top:2px;}
+.nowrow.lf i{font-style:normal;color:var(--orange);font-size:15px;padding-left:10px;}
+.moreleft{margin:2px 0 2px;font-size:12px;color:#7A8C94;}
+.found{outline:3px solid var(--orange)!important;outline-offset:2px;border-radius:9px;}
+.ptag.duetag{background:var(--orange);color:#fff;}
+.onedue{display:block;width:100%;margin:8px 0 2px;}
+.onedue.none{font-size:12.5px;color:#7A8C94;font-weight:600;margin:8px 0 4px;}
+.onedue.go{display:flex;align-items:center;justify-content:space-between;min-height:48px;
+  padding:9px 12px;background:#FDF1E4;border:1.5px solid var(--orange);border-radius:10px;
+  text-align:left;cursor:pointer;}
+.onedue.go b{display:block;font-size:14px;color:var(--navy);}
+.onedue.go em{display:block;font-style:normal;font-size:11.5px;font-weight:600;color:#8A6A48;margin-top:2px;}
+.onedue.go i{font-style:normal;font-size:12.5px;font-weight:800;color:var(--orange);
+  letter-spacing:.3px;padding-left:10px;white-space:nowrap;}
 </style>
 
 <div class="wrap">
@@ -3723,6 +3744,23 @@ function goalMetrics(c){
   cartDefs().forEach(function(d){ const v=crewNum(c,d.k); if(v!=null) out.push([d.lbl,fmtMet(v,d)]); });
   return out;
 }
+/* A leader wrote in that he could log a P2I fine but could not find anywhere
+   to put a 1-on-1 or inspect what he expects. He was right: it sits at the
+   bottom of an opened consultant card, which only exists once that consultant
+   is checked in, so four levels down with nothing naming it on the way.
+   This names it at the top of the roster and goes straight to it. */
+function oneDueLine(crew){
+  const on=crewOnToday();
+  const due=on.filter(function(c){ return oneDue(c.name); });
+  if(!on.length)
+    return '<p class="onedue none">Check in who is working to coach them and log a 1-on-1.</p>';
+  if(!due.length)
+    return '<p class="onedue none">Every 1-on-1 is current. Open anyone\u2019s card to log another.</p>';
+  return '<button type="button" class="onedue go" data-onego="'+escA(due[0].name)+'">'+
+    '<span><b>'+due.length+' one-on-one'+(due.length===1?'':'s')+' due</b>'+
+    '<em>'+esc(due.map(function(c){ return c.name; }).slice(0,3).join(', '))+
+    (due.length>3?' and '+(due.length-3)+' more':'')+'</em></span><i>Start &#9656;</i></button>';
+}
 function buildOneOnOne(c,coach){
   const nm=c.name, id=flyKey(nm), open=(S.ui['one-'+id]==='open');
   const d=oneoneDaysAgo(nm), due=oneDue(nm), rec=oneRec(nm)||{};
@@ -4182,7 +4220,8 @@ function buildPeople(crew,lever){
          '<div class="pn">'+esc(nm)+
            (rk?'<span class="prank">#'+rk.rank+' of '+rk.of+'</span>':'')+
            (p2i?'<span class="ptag fly">'+p2i+' P2I'+
-             (lastCoached(nm)?' \u00b7 '+esc(lastCoached(nm)):'')+'</span>':'')+'</div>'+
+             (lastCoached(nm)?' \u00b7 '+esc(lastCoached(nm)):'')+'</span>':'')+
+           (oneDue(nm)?'<span class="ptag duetag">1-on-1 due</span>':'')+'</div>'+
          '<div class="psum">'+cardSum(x)+'</div>'+
          '<em>'+(open?'\u25be':'\u25b8')+'</em>'+
        '</button><div class="pbody">';
@@ -4320,6 +4359,7 @@ function buildRoster(){
     'That is how anyone knows the play actually ran.<br><br>'+
     'No sitting. No phones. No huddling. Leader on the floor, not at the desk.</p>'+
     buildCheckin(crew)+
+    oneDueLine(crew)+
     '<a class="scbtn" href="'+SCORECARD_URL+'" target="_blank" rel="noopener">Open Scorecards to coach &#8599;</a>'+
     buildPeople(crew,lever);
   body.appendChild(pad);
@@ -4401,6 +4441,88 @@ function dueGroups(){
   out.sort(function(a,b){ return a.at-b.at; });
   return out;
 }
+/* ── WHAT IS LEFT ──────────────────────────────────────────────────────
+   A leader finished a shift at 26 of 27, tapped around looking for the one
+   that was open, and could not find it. He was right: four of the things that
+   count toward the total sit outside the timed groups (the floor log, the
+   impact prompt, the reflection, the handoff numbers), so none of them could
+   ever appear as past due, and once the checklist folds into P2I NINJA the
+   rest are behind a summary line.
+
+   The rule from here: nothing counts toward the total unless it can also be
+   found. Everything open is named and every name is a button that goes there.
+   ──────────────────────────────────────────────────────────────────────── */
+function leftItems(){
+  const out=[];
+  activeList().forEach(function(g,gi){
+    if(g.aor) return;
+    if(g.attest){
+      if(!S.items[itemId(gi,'a')]) out.push({label:subT(g.g), where:'Checklist', jump:gi});
+      return;
+    }
+    g.items.forEach(function(it,ii){
+      if(!S.items[itemId(gi,ii)])
+        out.push({label:subT(it[0]), where:subT(g.g).replace(/^\d{1,2}:\d{2}\s*[·-]?\s*/,''), jump:gi});
+    });
+  });
+  activeAors().forEach(function(x){
+    const k=aorKey(x.ai);
+    if(!(S.aor[k]||{}).status) out.push({label:x.a.n, where:'AOR walk', aor:k});
+  });
+  if(!S.eng.length)
+    out.push({label:'Log a touch on the floor', where:'Floor log', sel:'#eng-log'});
+  const ik=todaysImpact().k;
+  if(!(S.impact[ik]||'').trim())
+    out.push({label:'Your impact today', where:'One prompt', sel:'#imp-'+ik});
+  if(!(S.reflect||'').trim())
+    out.push({label:'Close out the day', where:'Reflection', sel:'#reflect'});
+  const core=[['goal','Goal'],['revenue','Revenue'],['opps','Opportunities'],['closes','Closes']];
+  const scope=(S.shift==='CLOSING')?'eod':'openm';
+  const src=(scope==='eod')?S.eod:S.openm;
+  const miss=core.filter(function(c){ return !String(src[c[0]]==null?'':src[c[0]]).trim(); });
+  if(miss.length)
+    out.push({label:miss.map(function(c){ return c[1]; }).join(', ')+' still blank',
+              where:(scope==='eod')?'End of day numbers':'Handoff numbers',
+              sel:'#m-'+scope+'-'+miss[0][0]});
+  return out;
+}
+/* Takes you to it, whatever it is behind. The checklist may be folded into the
+   P2I NINJA summary and the card itself may be shut, so both are opened before
+   the scroll rather than leaving a button that looks like it did nothing. */
+function gotoSel(sel){
+  const seen=function(){ const e=document.querySelector(sel); return (e&&e.offsetParent!==null)?e:null; };
+  let e=seen();
+  if(!e){
+    if(ninjaOn()) S.ui.ninja='off';
+    Object.keys(S.ui).forEach(function(k){ if(S.ui[k]==='shut') S.ui[k]=''; });
+    render(); save();
+  }
+  setTimeout(function(){
+    const x=document.querySelector(sel); if(!x) return;
+    x.scrollIntoView({block:'center'});
+    window.scrollBy(0,-110);
+    if(x.focus){ try{ x.focus({preventScroll:true}); }catch(err){} }
+    x.classList.add('found');
+    setTimeout(function(){ x.classList.remove('found'); },2200);
+  },e?0:70);
+}
+function leftBlock(){
+  const left=leftItems();
+  if(!left.length) return '';
+  const SHOW=8;
+  let h='<div class="nowblk leftb"><h4>'+left.length+' left</h4>';
+  h+=left.slice(0,SHOW).map(function(x){
+    const attr=(x.jump!=null)?('data-jump="'+x.jump+'"')
+              :x.aor?('data-aoropen="'+escA(x.aor)+'"')
+              :('data-goto="'+escA(x.sel)+'"');
+    return '<button type="button" class="nowrow lf" '+attr+'>'+
+      '<span>'+esc(x.label)+'<em>'+esc(x.where||'')+'</em></span><i>&#9656;</i></button>';
+  }).join('');
+  if(left.length>SHOW) h+='<p class="moreleft">and '+(left.length-SHOW)+' more below</p>';
+  h+='</div>';
+  return h;
+}
+
 function buildNow(){
   if(!S.shift) return null;
   const list=dueGroups();
@@ -4427,9 +4549,10 @@ function buildNow(){
     h+='<div class="nowblk ok"><h4>List is done</h4>'+
        '<p>Nothing outstanding. The rest of the shift is the floor.</p></div>';
   } else {
-    h+='<div class="nowblk ok"><h4>Nothing past due</h4>'+
-       '<p>You are current. '+(t.total-t.done)+' item'+((t.total-t.done)===1?'':'s')+' left on the list.</p></div>';
+    h+='<div class="nowblk ok"><h4>Nothing past due</h4></div>';
   }
+  /* Named and reachable, always, whether anything is late or not. */
+  if(t.total&&t.done<t.total) h+=leftBlock();
 
   if(next){
     const away=next.at-mins;
@@ -4967,11 +5090,32 @@ document.addEventListener('click',e=>{
        areas marked open and the walk unfolds again. */
     Object.keys(S.ui).forEach(function(k){ if(k.indexOf('aor-')===0) S.ui[k]=''; });
     S.ui['aor-'+t.dataset.aoropen]='open'; render(); save(); return; }
+  if(t.dataset.onego){
+    const nm=t.dataset.onego, id=flyKey(nm), ck='p-'+id;
+    S.ui[ck]='open'; S.ui['one-'+id]='open';
+    if(ninjaOn()) S.ui.ninja='off';
+    if(S.ui[S.shift+'-roster']==='shut') S.ui[S.shift+'-roster']='';
+    render(); save();
+    setTimeout(function(){
+      const e=document.querySelector('[data-onesave="'+nm.replace(/"/g,'\\"')+'"]');
+      if(e){ e.scrollIntoView({block:'center'}); window.scrollBy(0,-110); }
+    },70);
+    return; }
+  if(t.dataset.goto){ gotoSel(t.dataset.goto); return; }
   if(t.dataset.jump!=null){ const gi=+t.dataset.jump;
-    const b=document.querySelector('#list .grp[data-gi="'+gi+'"]');
-    if(b){ const k=S.shift+'-'+gi; if(S.ui[k]==='shut'){ S.ui[k]=''; render(); save(); }
-      setTimeout(function(){ const e=document.querySelector('#list .grp[data-gi="'+gi+'"]');
-        if(e){ e.scrollIntoView({block:'start'}); window.scrollBy(0,-230); } },40); }
+    const sel='#list .grp[data-gi="'+gi+'"]';
+    let b=document.querySelector(sel);
+    const k=S.shift+'-'+gi;
+    /* In P2I NINJA the whole checklist is behind a summary line, so a jump to
+       a checklist group has to come out of it first or the button does
+       nothing and the leader is left hunting again. */
+    let redraw=false;
+    if(!b && ninjaOn()){ S.ui.ninja='off'; redraw=true; }
+    if(S.ui[k]==='shut'){ S.ui[k]=''; redraw=true; }
+    if(redraw){ render(); save(); }
+    setTimeout(function(){ const e=document.querySelector(sel);
+      if(e){ e.scrollIntoView({block:'start'}); window.scrollBy(0,-230);
+        e.classList.add('found'); setTimeout(function(){ e.classList.remove('found'); },2200); } },redraw?70:40);
     return; }
   if(t.dataset.tog2){ const k=t.dataset.tog2;
     S.ui[k]=(S.ui[k]==='open')?'':'open'; render(); save(); return; }
