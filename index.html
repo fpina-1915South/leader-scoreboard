@@ -841,6 +841,12 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   font-size:13px;font-weight:700;line-height:1.35;}
 .cband.wait{background:var(--ice);color:var(--navy);border:1px solid #BFD9E3;}
 .cband.bad{background:#FBE9E7;color:#802020;border:1px solid #E8C4BE;}
+.grp.guide h2{background:var(--navy);color:#fff;}
+.grp.guide h2 span,.grp.guide h2 em{color:#BFD9E3;}
+.gbody{padding-top:4px;}
+.glist{margin:2px 0 10px;padding-left:20px;}
+.glist li{font-size:13px;line-height:1.5;color:var(--body);margin:0 0 9px;}
+.glist li b{color:var(--navy);}
 </style>
 
 <div class="wrap">
@@ -917,7 +923,7 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   </div>
   <div id="admbody"></div>
 </div>
-<input type="file" id="csvInput" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" style="display:none">
+<input type="file" id="csvInput" accept=".csv,.tsv,.txt,.xlsx,.xls,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none">
 <div id="coachwrap"></div>
 <div id="toast"></div>
 <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" multiple>
@@ -2042,6 +2048,277 @@ function reapplyGoals(){
     const p=DATA[CREW_SLOTS[i]];
     if(p&&p.goals){ applyGoals(p.goals,p.file); return; }
   }
+}
+
+/* ═══════ READING AN EXCEL FILE ════════════════════════════════════════
+   Half the reports arrive as .xlsx and asking somebody to Save As CSV first
+   is a step that gets skipped, so the file is opened here instead.
+
+   An .xlsx is a zip of XML. The browser can already unzip (DecompressionStream)
+   and already parses XML (DOMParser), so this needs no library and the tool
+   stays one self-contained file with nothing to load off the internet.
+
+   Everything below is reading. Nothing is written back to the workbook.
+   ──────────────────────────────────────────────────────────────────────── */
+function isXlsxName(n){ return /\.xlsx?$/i.test(String(n||'')) && !/\.csv$/i.test(String(n||'')); }
+function u16(d,o){ return d[o]|(d[o+1]<<8); }
+function u32(d,o){ return (d[o]|(d[o+1]<<8)|(d[o+2]<<16)|(d[o+3]<<24))>>>0; }
+
+/* The zip directory, read from the end backwards the way the format says. */
+function zipEntries(buf){
+  const d=new Uint8Array(buf);
+  let eo=-1;
+  const floor=Math.max(0,d.length-70000);
+  for(let i=d.length-22;i>=floor;i--){ if(u32(d,i)===0x06054b50){ eo=i; break; } }
+  if(eo<0) throw new Error('That file is not readable as an Excel workbook.');
+  const n=u16(d,eo+10), cd=u32(d,eo+16);
+  const out={}; let p=cd;
+  for(let i=0;i<n;i++){
+    if(u32(d,p)!==0x02014b50) break;
+    const method=u16(d,p+10), csize=u32(d,p+20);
+    const nl=u16(d,p+28), el=u16(d,p+30), cl=u16(d,p+32), lho=u32(d,p+42);
+    const name=new TextDecoder().decode(d.subarray(p+46,p+46+nl));
+    const lnl=u16(d,lho+26), lel=u16(d,lho+28);
+    const start=lho+30+lnl+lel;
+    out[name]={method:method, data:d.subarray(start,start+csize)};
+    p+=46+nl+el+cl;
+  }
+  return out;
+}
+async function zipText(entries,name){
+  const e=entries[name]; if(!e) return '';
+  if(e.method===0) return new TextDecoder().decode(e.data);
+  if(typeof DecompressionStream!=='function')
+    throw new Error('This browser cannot open Excel files. Save the report as CSV and load that.');
+  const s=new Blob([e.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new TextDecoder().decode(await new Response(s).arrayBuffer());
+}
+function colOf(ref){
+  let n=0;
+  for(let i=0;i<ref.length;i++){ const c=ref.charCodeAt(i);
+    if(c<65||c>90) break; n=n*26+(c-64); }
+  return n-1;
+}
+/* Excel counts days from 30 Dec 1899. A date arrives as that number, so a
+   column headed Date that holds 46000 is turned back into a real date. */
+function xlDate(v,yearHint){
+  const s=String(v==null?'':v).trim();
+  if(!s) return '';
+  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso) return iso[0];
+  const us=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(us) return us[3]+'-'+('0'+us[1]).slice(-2)+'-'+('0'+us[2]).slice(-2);
+  /* One month writes the day as "Tue 9/1" and keeps the year only in the
+     workbook title, so the year is handed in rather than guessed at. */
+  const md=s.match(/^(?:[A-Za-z]{3,9}\s+)?(\d{1,2})\/(\d{1,2})$/);
+  if(md&&yearHint) return yearHint+'-'+('0'+md[1]).slice(-2)+'-'+('0'+md[2]).slice(-2);
+  const n=Number(s);
+  if(!isFinite(n)||n<20000||n>80000) return '';
+  const ms=Date.UTC(1899,11,30)+Math.round(n)*86400000;
+  return new Date(ms).toISOString().slice(0,10);
+}
+/* The year, read off whatever the workbook calls itself. Never assumed. */
+function bookYear(book){
+  for(let i=0;i<book.length;i++){
+    const rows=book[i].rows||[];
+    for(let j=0;j<Math.min(rows.length,6);j++){
+      const line=(rows[j]||[]).join(' ');
+      const m=line.match(/\b(20\d{2})\b/);
+      if(m) return m[1];
+    }
+  }
+  return '';
+}
+function strings(xml){
+  if(!xml) return [];
+  const doc=new DOMParser().parseFromString(xml,'application/xml');
+  const si=doc.getElementsByTagName('si'), out=[];
+  for(let i=0;i<si.length;i++){
+    const t=si[i].getElementsByTagName('t'); let s='';
+    for(let j=0;j<t.length;j++){
+      if(t[j].parentNode && t[j].parentNode.nodeName==='rPh') continue;   /* phonetic guide */
+      s+=t[j].textContent;
+    }
+    out.push(s);
+  }
+  return out;
+}
+function sheetGrid(xml,shared){
+  const doc=new DOMParser().parseFromString(xml,'application/xml');
+  const rs=doc.getElementsByTagName('row'), rows=[];
+  for(let i=0;i<rs.length;i++){
+    const cs=rs[i].getElementsByTagName('c'), arr=[];
+    for(let j=0;j<cs.length;j++){
+      const c=cs[j], ref=c.getAttribute('r')||'', t=c.getAttribute('t');
+      const at=ref?colOf(ref):j;
+      let v='';
+      if(t==='inlineStr'){ const is=c.getElementsByTagName('t'); v=is.length?is[0].textContent:''; }
+      else {
+        const vs=c.getElementsByTagName('v'); const raw=vs.length?vs[0].textContent:'';
+        v=(t==='s')?(shared[parseInt(raw,10)]||''):raw;
+      }
+      arr[at>=0?at:j]=v;
+    }
+    for(let k=0;k<arr.length;k++) if(arr[k]===undefined) arr[k]='';
+    rows.push(arr);
+  }
+  return rows;
+}
+/* Sheets in the order the workbook lists them, with their real names. */
+async function readWorkbook(buf){
+  const z=zipEntries(buf);
+  const shared=strings(await zipText(z,'xl/sharedStrings.xml'));
+  const wbXml=await zipText(z,'xl/workbook.xml');
+  if(!wbXml) throw new Error('That file is not readable as an Excel workbook.');
+  const relXml=await zipText(z,'xl/_rels/workbook.xml.rels');
+  const rel={};
+  if(relXml){
+    const rd=new DOMParser().parseFromString(relXml,'application/xml');
+    const rs=rd.getElementsByTagName('Relationship');
+    for(let i=0;i<rs.length;i++){
+      let tgt=rs[i].getAttribute('Target')||'';
+      tgt=tgt.replace(/^\//,'').replace(/^xl\//,'');
+      rel[rs[i].getAttribute('Id')]=tgt;
+    }
+  }
+  const wd=new DOMParser().parseFromString(wbXml,'application/xml');
+  const sh=wd.getElementsByTagName('sheet'), out=[];
+  for(let i=0;i<sh.length;i++){
+    const nm=sh[i].getAttribute('name')||('Sheet'+(i+1));
+    const rid=sh[i].getAttribute('r:id')||sh[i].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+    let path=rel[rid]||('worksheets/sheet'+(i+1)+'.xml');
+    const xml=await zipText(z,'xl/'+path);
+    if(!xml) continue;
+    out.push({name:nm, rows:sheetGrid(xml,shared)});
+  }
+  if(!out.length) throw new Error('That workbook has no sheets this tool can read.');
+  return out;
+}
+
+/* ── Turning a workbook into the text the CSV reader already understands ── */
+function toCsv(rows){
+  return rows.map(function(r){
+    return (r||[]).map(function(c){
+      const s=String(c==null?'':c);
+      return /[",\n\r]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s;
+    }).join(',');
+  }).join('\n');
+}
+/* A sheet usually opens with a title and a blank line or two before the real
+   header. The header is the first row that has several non-empty cells and a
+   row of data under it. */
+function headerAt(rows){
+  for(let i=0;i<Math.min(rows.length,25);i++){
+    const a=(rows[i]||[]).map(function(x){ return String(x==null?'':x).trim(); });
+    const filled=a.filter(Boolean).length;
+    if(filled<2) continue;
+    const next=(rows[i+1]||[]).map(function(x){ return String(x==null?'':x).trim(); }).filter(Boolean).length;
+    if(next>=2) return i;
+  }
+  return -1;
+}
+function sheetAsTable(sh){
+  const h=headerAt(sh.rows); if(h<0) return null;
+  const head=(sh.rows[h]||[]).map(function(x){ return String(x==null?'':x).trim(); });
+  const wide=head.length;
+  const body=sh.rows.slice(h+1).filter(function(r){
+    return (r||[]).some(function(x){ return String(x==null?'':x).trim()!==''; });
+  });
+  if(!body.length) return null;
+  const di=head.map(function(x){ return /^date$/i.test(x); });
+  const rows=body.map(function(r){
+    const o=[];
+    for(let i=0;i<wide;i++){ const v=(r||[])[i]; o.push(di[i]?(xlDate(v)||v):v); }
+    return o;
+  });
+  return {head:head, rows:rows, score:rows.length*head.filter(Boolean).length};
+}
+/* The daily budget workbook is one sheet per store with a targets block and a
+   daily table underneath. Flattened here to the same shape the CSV version
+   has, so the goals slot does not have to know where it came from. */
+/* The workbook has a sheet per store AND a sheet per market, and a market can
+   look like a store to the matcher: "North West" lands on Ashley North, which
+   would have given Jax North its whole market's budget on top of its own.
+   So the Index sheet's own Store column decides which sheets are stores, and
+   where two sheets still land on one store the exact name wins and the loose
+   one is dropped rather than added. */
+function budgetStoreSheets(book){
+  const named={};
+  book.forEach(function(sh){
+    const h=headerAt(sh.rows); if(h<0) return;
+    const hd=(sh.rows[h]||[]).map(function(x){ return String(x==null?'':x).trim().toLowerCase(); });
+    const si=hd.indexOf('store'); if(si<0||hd.indexOf('market')<0) return;
+    sh.rows.slice(h+1).forEach(function(r){
+      const v=String((r||[])[si]==null?'':r[si]).trim();
+      if(v) named[nk(v)]=1;
+    });
+  });
+  const listed=Object.keys(named).length;
+  const keep=[], claim={};
+  book.forEach(function(sh){
+    if(listed && !named[nk(sh.name)]) return;          /* not on the workbook's own store list */
+    const to=matchStore(sh.name); if(!to) return;
+    const exact=nk((to.split(DASH)[1]||to)).replace(/^ashley/,'')===nk(sh.name);
+    const had=claim[to];
+    if(!had || (exact && !had.exact)) claim[to]={sh:sh, exact:exact};
+    else if(exact===had.exact) claim[to]={sh:null, exact:exact};   /* a real tie, take neither */
+  });
+  Object.keys(claim).forEach(function(k){ if(claim[k].sh) keep.push(claim[k].sh); });
+  return keep;
+}
+function budgetFlat(book){
+  const yr=bookYear(book);
+  const out=[['Store','Date','Daily goal','Traffic goal','MTD goal','MTD traffic goal','Month goal','Month traffic goal']];
+  budgetStoreSheets(book).forEach(function(sh){
+    const rows=sh.rows;
+    let h=-1;
+    for(let i=0;i<rows.length;i++){
+      const a=(rows[i]||[]).map(function(x){ return String(x==null?'':x).trim().toLowerCase(); });
+      if(a[0]==='date'&&a.indexOf('traffic')>-1&&a.indexOf('sales')>-1){ h=i; break; }
+    }
+    if(h<0) return;
+    const hd=(rows[h]||[]).map(function(x){ return String(x==null?'':x).trim().toLowerCase(); });
+    const ci={d:hd.indexOf('date'), t:hd.indexOf('traffic'), s:hd.indexOf('sales'),
+              mt:hd.indexOf('mtd traffic'), ms:hd.indexOf('mtd sales')};
+    if(ci.d<0||ci.t<0||ci.s<0) return;
+    let monthSales='', monthTraffic='';
+    for(let i=0;i<h;i++){
+      const lab=String((rows[i]||[])[0]==null?'':rows[i][0]).trim().toLowerCase();
+      const val=((rows[i]||[]).slice(1).filter(function(x){ return String(x==null?'':x).trim()!==''; })[0]);
+      if(/^total traffic/.test(lab)) monthTraffic=val==null?'':val;
+      if(/^total written sales/.test(lab)) monthSales=val==null?'':val;
+    }
+    for(let i=h+1;i<rows.length;i++){
+      const r=rows[i]||[], d=xlDate(r[ci.d],yr);
+      if(!d) continue;
+      out.push([sh.name, d, r[ci.s], r[ci.t],
+                ci.ms>=0?r[ci.ms]:'', ci.mt>=0?r[ci.mt]:'', monthSales, monthTraffic]);
+    }
+  });
+  return out.length>1?out:null;
+}
+/* OPEN is a seat nobody is in yet. It is not a person and must not become one
+   on a roster or in a leader dropdown. */
+function dropOpenSeats(table){
+  const i=table.head.map(function(x){ return String(x||'').trim().toLowerCase(); }).indexOf('name');
+  if(i<0) return table;
+  table.rows=table.rows.filter(function(r){ return String(r[i]==null?'':r[i]).trim().toUpperCase()!=='OPEN'; });
+  return table;
+}
+function workbookToText(book,slot){
+  if(slot==='goals'){
+    const flat=budgetFlat(book);
+    if(flat) return {text:toCsv(flat), note:'daily budget workbook, '+(flat.length-1)+' store days'};
+  }
+  /* Otherwise the sheet with the most real data wins, which is the one the
+     report is actually in rather than a READ ME or an email list. */
+  let best=null, bestName='';
+  book.forEach(function(sh){
+    const t=sheetAsTable(sh);
+    if(t&&(!best||t.score>best.score)){ best=t; bestName=sh.name; }
+  });
+  if(!best) throw new Error('Could not find a table in that workbook. Save the sheet as CSV and load that.');
+  if(slot==='leaders'||slot==='roster') dropOpenSeats(best);
+  return {text:toCsv([best.head].concat(best.rows)), note:'sheet "'+bestName+'", '+best.rows.length+' rows'};
 }
 
 /* ── CSV ─────────────────────────────────────────────────────────────── */
@@ -4541,8 +4818,46 @@ function publishHTML(){
   html=html.replace(marker,function(){ return 'const BAKED = '+safe+';'; });   /* function form: a $ in the data is not a backreference */
   return '<!DOCTYPE html>\n<html lang="en">'+html+'</html>';
 }
+/* The Field Leader App opens on a guide, so this does too. The daily routine
+   in order, folded away once it is known. Nothing here is a date or a figure:
+   the exact range to run each consultant report for is on that slot's own
+   card, worked out from the daily report that is loaded. */
+function admGuide(){
+  const open=(S.ui.admhelp==='open');
+  const done=['store','goals','crew','crewWtd','crewDay','carts','roster','leaders']
+    .filter(function(k){ return DATA[k]&&DATA[k].rows&&DATA[k].rows.length; }).length;
+  let h='<div class="grp guide'+(open?' on':'')+'"><h2 data-admhelp="1">HOW TO RUN THE DAY'+
+    '<span>'+(open?'tap to fold':'tap to open')+'<em>'+done+'/8 '+(open?'&#9662;':'&#9656;')+'</em></span></h2>';
+  if(!open) return h+'</div>';
+  h+='<div class="numpad gbody">'+
+    '<p class="admnote"><b>Every morning, about four minutes.</b></p>'+
+    '<ol class="glist">'+
+      '<li><b>Daily report</b> for yesterday. Load it into <b>Store daily report</b> first, '+
+        'because the three consultant cards read their date range off it.</li>'+
+      '<li><b>Consultant report</b>, run three times. The date range for each one is '+
+        'printed on its own card below. Same export every time, only the range changes.'+
+        '<br>Month to date, week to date, yesterday.</li>'+
+      '<li><b>Open carts detail</b> into <b>Consultant cart report</b>.</li>'+
+      '<li><b>Push to cloud</b> at the bottom. That is the step that puts the new day '+
+        'on every leader\u2019s phone. Nothing is sent until you tap it.</li>'+
+    '</ol>'+
+    '<p class="admnote"><b>Only when people change</b><br>'+
+      '<b>Consultant to store list</b> and <b>Store leaders</b> are the roster. Load them when '+
+      'somebody joins or leaves, not daily. The leaders file is what turns the Leader box into '+
+      'a dropdown and prefills their sign-in address.</p>'+
+    '<p class="admnote"><b>Monthly</b><br>'+
+      '<b>Daily goals by store</b> is the budget workbook. New one each month.</p>'+
+    '<p class="admnote"><b>CSV or Excel, either one.</b> An .xlsx is opened here directly, so there '+
+      'is no Save As CSV step. The budget workbook\u2019s per-store sheets are flattened on the way in.</p>'+
+    '<p class="admnote"><b>If a card says a column was not found</b>, the export changed shape. '+
+      'Tap the column name on the card to point it at the right one. Nothing is guessed.</p>'+
+    '<p class="admnote">Pay columns are refused on the way in and never stored, whatever the file carries.</p>'+
+    '</div>';
+  return h+'</div>';
+}
 function admRender(){
   document.getElementById('admbody').innerHTML=
+    admGuide()+
     slotCard('store')+slotCard('goals')+slotCard('crew')+slotCard('crewWtd')+slotCard('crewDay')+
     slotCard('carts')+slotCard('roster')+slotCard('leaders')+
     '<div class="grp"><h2 style="cursor:default">Send it to the stores<span>'+
@@ -4558,17 +4873,34 @@ function admRender(){
     '<div class="hint">Nothing here leaves the tablet.<br>Pay columns are refused on the way in and never stored.</div>';
 }
 const CSVIN=document.getElementById('csvInput');
+/* One place both file types land, so a workbook and a CSV behave the same
+   from here on. */
+function takeFile(text,slot,name,note){
+  const res=ingest(text,slot,name);
+  if(res.err){ toast(res.err); return; }
+  DATA[slot]=res; dataSave(); admRender();
+  toast(res.rows.length+' row'+(res.rows.length===1?'':'s')+' loaded'+
+    (note?' from '+note:'')+
+    (res.blocked.length?', '+res.blocked.length+' pay column'+(res.blocked.length===1?'':'s')+' refused':''));
+}
 if(CSVIN) CSVIN.addEventListener('change',function(){
   const f=this.files&&this.files[0], slot=csvTarget; this.value='';
   if(!f||!slot) return;
   const rd=new FileReader();
-  rd.onload=function(){
-    const res=ingest(String(rd.result||''),slot,f.name);
-    if(res.err){ toast(res.err); return; }
-    DATA[slot]=res; dataSave(); admRender();
-    toast(res.rows.length+' row'+(res.rows.length===1?'':'s')+' loaded'+
-      (res.blocked.length?', '+res.blocked.length+' pay column'+(res.blocked.length===1?'':'s')+' refused':''));
-  };
+  if(isXlsxName(f.name)){
+    toast('Opening '+f.name+'\u2026');
+    rd.onload=async function(){
+      try{
+        const book=await readWorkbook(rd.result);
+        const got=workbookToText(book,slot);
+        takeFile(got.text,slot,f.name,got.note);
+      }catch(e){ toast(e.message||'Could not open that workbook.'); }
+    };
+    rd.onerror=function(){ toast('Could not read that file'); };
+    rd.readAsArrayBuffer(f);
+    return;
+  }
+  rd.onload=function(){ takeFile(String(rd.result||''),slot,f.name,''); };
   rd.onerror=function(){ toast('Could not read that file'); };
   rd.readAsText(f);
 });
@@ -4661,6 +4993,7 @@ document.addEventListener('click',e=>{
     S.crewin={}; if(!on) all.forEach(c=>{S.crewin[c.name]=1;});
     render(); save(); return; }
   if(t.dataset.pick){ csvTarget=t.dataset.pick; document.getElementById('csvInput').click(); return; }
+  if(t.dataset.admhelp){ S.ui.admhelp=(S.ui.admhelp==='open')?'':'open'; save(); admRender(); return; }
   if(t.dataset.publish){ publishCopy(); return; }
   if(t.dataset.pushcloud){ pushCloud(t); return; }
   if(t.dataset.clr){ DATA[t.dataset.clr]=null; dataSave(); admRender(); render();
