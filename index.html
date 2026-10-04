@@ -1408,9 +1408,9 @@ function render(){
   if(S.shift==='CLOSING') host.appendChild(buildEOD());
   host.appendChild(buildImpact());
   host.appendChild(buildReflection());
-  cashSync();
   activeAors().forEach(x=>renderShots(aorKey(x.ai)));
   renderQuick();
+  cashPaint();          /* the skeleton above is filled in here, once */
   updateProg();
 }
 
@@ -1957,7 +1957,7 @@ function denomRows(k){
       '<label for="cq-'+k+'-'+d[0]+'">'+esc(d[1])+'</label>'+
       '<input id="cq-'+k+'-'+d[0]+'" inputmode="numeric" pattern="[0-9]*" placeholder="0" '+
         'data-cq="'+k+'" data-d="'+d[0]+'" value="'+escA(q)+'">'+
-      '<b>'+amt+'</b></div>';
+      '<b id="cv-'+k+'-'+d[0]+'">'+amt+'</b></div>';
   }).join('')+
   '<div class="drow other">'+
     '<label for="co-'+k+'">Other</label>'+
@@ -1965,7 +1965,7 @@ function denomRows(k){
     '<b></b></div>'+
   '<input class="onote" type="text" placeholder="What the Other line is" data-cn="'+k+'" value="'+escA(s.note)+'">'+
   '</div>'+
-  '<div class="ctot"><span>Total cash</span><b>'+money(cashCounted(k))+'</b></div>'+
+  '<div class="ctot"><span>Total cash</span><b id="ctot-'+k+'">'+money(cashCounted(k))+'</b></div>'+
   '<div class="cwho">'+
     '<div class="cf"><label for="cby-'+k+'">Counted by</label>'+
       '<input id="cby-'+k+'" type="text" placeholder="CSR assigned to the drawer" data-cby="'+k+'" value="'+escA(s.by)+'"></div>'+
@@ -1983,6 +1983,86 @@ function dropRows(){
         '<input type="text" placeholder="MGR" maxlength="4" data-dr="'+i+'" data-f="mgr" value="'+escA(d.mgr)+'">'+
         '<input type="text" placeholder="EMP" maxlength="4" data-dr="'+i+'" data-f="emp" value="'+escA(d.emp)+'">'+
       '</div>'; }).join('');
+}
+/* Where the morning number came from, in words. */
+function cashAmWord(r){
+  if(r&&r.am&&r.am.src==='counted') return 'counted this morning'+(r.am.by?' by '+r.am.by:'');
+  if(r&&r.am&&r.am.src==='typed')   return 'typed in';
+  return 'no morning count on this tablet, type it';
+}
+/* ── PAINTING THE CASH NUMBERS WITHOUT REBUILDING THE SCREEN ───────────
+   Khoury at Yulee, first night on it: "counting the cash drawer loses the
+   keyboard on ipad for every number put in". Every keystroke was calling
+   render(), which rebuilds the page, which destroys the input the leader is
+   typing into, which closes the iPad keyboard. Eleven denominations, and the
+   keyboard went away on every one of them.
+
+   So typing paints. Only the computed cells are written, by id, and no input
+   is touched, so focus and the keyboard stay exactly where they are. The full
+   render happens on blur, when the leader has moved on and nothing is lost. */
+function cashPaint(){
+  if(!S.shift) return;
+  cashInit();
+  const side=(S.shift==='CLOSING')?'pm':'am';
+  const put=function(id,txt){ const e=document.getElementById(id); if(e&&e.textContent!==txt) e.textContent=txt; };
+  DENOMS.forEach(function(d){
+    const q=parseInt(cashSide(side).n[d[0]],10);
+    put('cv-'+side+'-'+d[0], isFinite(q)?money(q*d[2]):'');
+  });
+  put('ctot-'+side, money(cashCounted(side)));
+
+  /* the folded summary in the header */
+  const em=document.querySelector('.grp.cash h2 em');
+  if(em){
+    const done=cashTouched(side);
+    let txt;
+    if(!done) txt='not counted';
+    else if(side==='am') txt=money(cashCounted('am'));
+    else {
+      const r=cashRecon();
+      txt=(r.over==null)?(money(r.pm)+' \u00b7 not balanced')
+         :(Math.abs(r.over)<0.005?(money(r.pm)+' \u00b7 balanced'):(money(r.pm)+' \u00b7 '+money(r.over)));
+    }
+    const arrow=em.textContent.replace(/^[^\u25b8\u25be]*/,'');
+    em.textContent=txt+' '+arrow.trim();
+  }
+  const box=document.querySelector('.grp.cash');
+  if(box) box.classList.toggle('needs', !cashDone());
+
+  if(side==='pm'){
+    const r=cashRecon();
+    put('rc-pm', money(r.pm));
+    put('rc-amsrc', cashAmWord(r));
+    if(r.am) put('rc-am','\u2212 '+money(r.am.v));
+    put('rc-drops','+ '+money(r.drops));
+    put('rc-taken', r.takenIn==null?'\u2014':money(r.takenIn));
+    const row=document.getElementById('rc-overrow'), note=document.getElementById('rc-note');
+    if(r.over==null){
+      put('rc-over','\u2014');
+      if(row){ row.className='rr over wait'; }
+      if(note){ note.className='admnote';
+        note.textContent=(r.am==null)?'Needs the morning count.':'Needs the cash on the log sheet.'; }
+    } else {
+      const ok=Math.abs(r.over)<0.005;
+      put('rc-over', money(r.over));
+      if(row){ row.className='rr over '+(ok?'good':'bad'); }
+      if(note){ note.className='admnote'+(ok?'':' bad');
+        note.textContent=ok?'Balanced.':'Should be zero. Recount before you close it out.'; }
+    }
+  }
+  /* the checklist row and the shift count follow the money, and neither of
+     them holds an input, so repainting them cannot cost anybody a keyboard */
+  cashSync();
+  const crow=document.querySelector('.row.cashrow');
+  if(crow){
+    const done=cashDone();
+    crow.className='row cashrow'+(done?' ok':'');
+    const lbl=crow.querySelector('.lbl i');
+    if(lbl) lbl.textContent='\u2014 '+(done?('counted, '+money(cashCounted(side))):'count it below, this ticks itself');
+    const btn=crow.querySelector('[data-cashgo]');
+    if(btn) btn.textContent=done?'\u2713':'Count';
+  }
+  if(typeof updateProg==='function') updateProg();
 }
 function buildCash(){
   cashInit();
@@ -2016,30 +2096,27 @@ function buildCash(){
     h+=dropRows()+
       '<p class="admnote">Log a drop here when it happens. The closer sees it tonight and it carries into the over and short.</p>';
   } else {
+    /* Every line below is painted, never rebuilt, and the morning input is
+       always here rather than appearing only once a value exists. A block that
+       changes shape mid keystroke is a block that throws the iPad keyboard
+       away, which is exactly what this used to do. */
     const r=cashRecon();
+    const amCounted=cashTouched('am');
     h+='<div class="sub2">The close<em>night count against the day</em></div><div class="recon">';
-    h+='<div class="rr"><span>Total cash counted</span><b>'+money(r.pm)+'</b></div>';
-    if(r.am){
-      h+='<div class="rr"><span>Less morning count'+
-         (r.am.src==='counted'?'<em>counted this morning'+(r.am.by?' by '+esc(r.am.by):'')+'</em>':'<em>typed in</em>')+
-         '</span><b>− '+money(r.am.v)+'</b></div>';
-    } else {
-      h+='<div class="rr miss"><span>Less morning count<em>no morning count on this tablet</em></span>'+
-         '<input inputmode="decimal" placeholder="$0.00" data-amtyped="1" value="'+escA(S.cash.amTyped)+'"></div>';
-    }
+    h+='<div class="rr"><span>Total cash counted</span><b id="rc-pm">'+money(r.pm)+'</b></div>';
+    h+='<div class="rr'+(amCounted?'':' miss')+'"><span>Less morning count'+
+       '<em id="rc-amsrc">'+esc(cashAmWord(r))+'</em></span>'+
+       (amCounted
+         ? '<b id="rc-am">\u2212 '+money(r.am.v)+'</b>'
+         : '<input id="rc-amin" inputmode="decimal" placeholder="$0.00" data-amtyped="1" value="'+escA(S.cash.amTyped)+'">')+
+       '</div>';
     h+=dropRows();
-    h+='<div class="rr"><span>Plus drops</span><b>+ '+money(r.drops)+'</b></div>';
-    h+='<div class="rr sum"><span>Cash taken in</span><b>'+(r.takenIn==null?'—':money(r.takenIn))+'</b></div>';
+    h+='<div class="rr"><span>Plus drops</span><b id="rc-drops">+ '+money(r.drops)+'</b></div>';
+    h+='<div class="rr sum"><span>Cash taken in</span><b id="rc-taken">'+(r.takenIn==null?'\u2014':money(r.takenIn))+'</b></div>';
     h+='<div class="rr"><span>Less cash on the log sheet</span>'+
        '<input inputmode="decimal" placeholder="$0.00" data-clog="1" value="'+escA(S.cash.log)+'"></div>';
-    if(r.over==null){
-      h+='<div class="rr over wait"><span>Over / (short)</span><b>—</b></div>'+
-         '<p class="admnote">'+(r.am==null?'Needs the morning count.':'Needs the cash on the log sheet.')+'</p>';
-    } else {
-      const ok=Math.abs(r.over)<0.005;
-      h+='<div class="rr over '+(ok?'good':'bad')+'"><span>Over / (short)</span><b>'+money(r.over)+'</b></div>'+
-         '<p class="admnote'+(ok?'':' bad')+'">'+(ok?'Balanced.':'Should be zero. Recount before you close it out.')+'</p>';
-    }
+    h+='<div class="rr over" id="rc-overrow"><span>Over / (short)</span><b id="rc-over">\u2014</b></div>'+
+       '<p class="admnote" id="rc-note"></p>';
     h+='</div>';
   }
   pad.innerHTML=h;
@@ -6158,19 +6235,19 @@ document.addEventListener('input',e=>{
     S.fly[k]=S.fly[k]||{n:0,note:'',well:'',at:[]}; S.fly[k].well=t.value; S.fly[k].by=byNow(); }
   else if(t.dataset.reflect!=null){S.reflect=t.value;updateProg();}
   else if(t.dataset.cq!=null){ cashInit();
-    S.cash[t.dataset.cq].n[t.dataset.d]=t.value.replace(/[^0-9]/g,''); render(); save(); return; }
-  else if(t.dataset.co!=null){ cashInit(); S.cash[t.dataset.co].other=t.value; render(); save(); return; }
+    S.cash[t.dataset.cq].n[t.dataset.d]=t.value.replace(/[^0-9]/g,''); cashPaint(); saveDebounced(); return; }
+  else if(t.dataset.co!=null){ cashInit(); S.cash[t.dataset.co].other=t.value; cashPaint(); saveDebounced(); return; }
   else if(t.dataset.cn!=null){ cashInit(); S.cash[t.dataset.cn].note=t.value; saveDebounced(); return; }
   else if(t.dataset.cby!=null){ cashInit(); S.cash[t.dataset.cby].by=t.value; saveDebounced(); return; }
   else if(t.dataset.cvr!=null){ cashInit(); S.cash[t.dataset.cvr].ver=t.value; saveDebounced(); return; }
   else if(t.dataset.crewother!=null){ S.ui.crewothertxt=t.value; saveDebounced(); return; }
   else if(t.dataset.cdraw!=null){ cashInit(); S.cash.drawer=t.value; saveDebounced(); return; }
-  else if(t.dataset.clog!=null){ cashInit(); S.cash.log=t.value; render(); save(); return; }
-  else if(t.dataset.amtyped!=null){ cashInit(); S.cash.amTyped=t.value; render(); save(); return; }
+  else if(t.dataset.clog!=null){ cashInit(); S.cash.log=t.value; cashPaint(); saveDebounced(); return; }
+  else if(t.dataset.amtyped!=null){ cashInit(); S.cash.amTyped=t.value; cashPaint(); saveDebounced(); return; }
   else if(t.dataset.dr!=null){ cashInit();
     const i=+t.dataset.dr; S.cash.drops[i]=S.cash.drops[i]||{amt:'',mgr:'',emp:''};
     S.cash.drops[i][t.dataset.f]=t.value;
-    if(t.dataset.f==='amt'){ render(); save(); } else saveDebounced();
+    if(t.dataset.f==='amt'){ cashPaint(); } saveDebounced();
     return; }
   else if(t.dataset.m!=null){                                  // shared sales-metric grids
     S[t.dataset.m][t.dataset.k]=t.value;
@@ -6197,6 +6274,25 @@ document.getElementById('store').addEventListener('change',e=>{
   render();   /* the numbers, coaching and crew panels are store specific */
   cloudPull();   /* a different store is a different set of numbers */
   SCHLOAD={state:'',code:'',msg:''}; SCHED=null; schedSave(); schedPull();
+});
+/* When the leader leaves a cash field the screen catches up properly: the
+   typed morning count becomes a value, the group settles, the shift total is
+   written down. Doing it on blur rather than on every key is the whole fix. */
+document.addEventListener('focusout',function(e){
+  const t=e.target; if(!t||!t.dataset) return;
+  if(t.dataset.cq!=null||t.dataset.co!=null||t.dataset.clog!=null||
+     t.dataset.amtyped!=null||t.dataset.dr!=null){
+    save();
+    setTimeout(function(){
+      /* only if focus has actually left the cash block, so tabbing from one
+         denomination to the next does not rebuild under the keyboard */
+      const a=document.activeElement;
+      if(a&&a.dataset&&(a.dataset.cq!=null||a.dataset.co!=null||a.dataset.clog!=null||
+         a.dataset.amtyped!=null||a.dataset.dr!=null||a.dataset.cby!=null||
+         a.dataset.cvr!=null||a.dataset.cn!=null||a.dataset.cdraw!=null)) return;
+      render();
+    },120);
+  }
 });
 document.getElementById('storeother').addEventListener('input',e=>{S.header.storeother=e.target.value;saveDebounced();});
 document.getElementById('closeat').addEventListener('change',e=>{S.header.closeat=e.target.value;render();save();});
