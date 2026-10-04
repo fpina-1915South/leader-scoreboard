@@ -4465,8 +4465,14 @@ function rosterDiff(){
   const added=on.filter(function(n){ return !schk[nk(n)]; });
   const silent=sched.filter(function(n){
     return !onk[nk(n)] && !out.some(function(o){ return nk(o.who)===nk(n); }); });
-  return {scheduled:sched, worked:on, out:out, added:added, unaccounted:silent,
-          published:!!(SCHED&&SCHED.built), by:(SCHED&&SCHED.by)||''};
+  /* Published means a schedule exists for THIS day, not that one exists at
+     all. A week posted for next Monday was making today's record say the
+     schedule was published and then count every single person as an extra
+     who turned up unscheduled. */
+  const live=schedOn();
+  return {scheduled:sched, worked:on,
+          out:live?out:[], added:live?added:[], unaccounted:live?silent:[],
+          published:live, by:live?((SCHED&&SCHED.by)||''):''};
 }
 
 /* ── The chips ─────────────────────────────────────────────────────────── */
@@ -7850,10 +7856,15 @@ function summaryOf(snap){
   const ones=crewRows().map(function(c){ const r=oneRec(c.name);
     return (r&&r.date===localDay())?{name:c.name, wins:r.wins, opps:r.opps, goals:r.goals||[]}:null;
   }).filter(Boolean);
+  /* One read, used by the record and by the four numbers the Field Leader App
+     pulls out of it. They were reading snap.roster, which never existed:
+     the roster is built here, not on the snapshot, so every record went up
+     saying nobody worked while naming six people who did. */
+  const rd=rosterDiff();
   return {leaderScore:sc.score, leaderScoreParts:sc.parts,
           extP2I:sc.extP2I, intP2I:sc.intP2I, oneOnOnes:ones,
           leader:who, leaderRole:(lrec?lrec.role:''), leaderFromList:!!lrec,
-          checkedIn:Object.keys(S.crewin||{}), coaching:coach, roster:rosterDiff(),
+          checkedIn:Object.keys(S.crewin||{}), coaching:coach, roster:rd,
           rosterLog:(S.rosterlog||[]).map(function(e){ return {t:e.t, who:e.who, why:e.why, at:hm2(e.at), by:e.by}; }),
           /* The store NAME, the way the Field Leader App writes it. Its rules
              decide who may read a record by matching this against the stores
@@ -7875,11 +7886,11 @@ function summaryOf(snap){
           firstTouch:snap.meta.firstTouch, lastTouch:snap.meta.lastTouch,
           elements:elementRoll(snap),
           exceptions:ex, missed:miss,
-          scheduled:((snap.roster||{}).scheduled||[]).length,
-          worked:((snap.roster||{}).worked||[]).length,
-          rosterOut:((snap.roster||{}).out||[]).map(function(o){ return o.who+(o.why?' ('+o.why+')':''); }),
-          rosterAdded:((snap.roster||{}).added||[]),
-          schedulePublished:!!((snap.roster||{}).published),
+          scheduled:rd.scheduled.length,
+          worked:rd.worked.length,
+          rosterOut:rd.out.map(function(o){ return o.who+(o.why?' ('+o.why+')':''); }),
+          rosterAdded:rd.added,
+          schedulePublished:!!rd.published,
           shortBy:Math.max(0,(snap.meta.total||0)-(snap.meta.done||0)),
           openItems:((typeof leftItems==='function')?leftItems():[]).map(function(o){
             return (o.where?o.where+' \u00b7 ':'')+o.label; })};
