@@ -4475,6 +4475,55 @@ function rosterDiff(){
           published:live, by:live?((SCHED&&SCHED.by)||''):''};
 }
 
+/* ── WHO IS ON WITH YOU, AND WHO COMES IN LATER ────────────────────────
+   A store runs two or three shifts and the board had one roster for the whole
+   day. An opening leader was being asked to confirm people who do not walk in
+   until two in the afternoon, and "Everyone here" was a claim about the future
+   at the moment they tapped it.
+
+   The Scheduler's own codes say which shift somebody is on: O is the opener,
+   M the mid, C the closer, F a full day, S the single Sunday shift and S2 the
+   Sunday close. That is an order, and an order is all this needs. No clock
+   time is invented and no template is reimplemented, so nothing here can put
+   a wrong shift time on a leader's screen.
+
+   A custom shift carries real hours, so it is ranked against the store's own
+   opening time, which the leader has already set in the header. Anything this
+   does not recognise is treated as on now: a name in the wrong group costs a
+   scroll, a name that is hidden costs the coaching.
+   ──────────────────────────────────────────────────────────────────────── */
+const SHIFT_RANK={O:1, F:1, S:1, M:2, C:3, S2:3};
+const SHIFT_WORD={O:'Opener', M:'Mid', C:'Closer', F:'Full day', S:'Sunday', S2:'Sun close'};
+/* 1 is on from open, 2 is the middle of the day, 3 closes. */
+function shiftRank(r){
+  if(!r) return 1;
+  const code=String(r.code||'').trim().toUpperCase();
+  if(SHIFT_RANK[code]) return SHIFT_RANK[code];
+  const t=String(r.start||'');
+  const m=t.match(/^(\d{1,2}):(\d{2})$/);
+  if(m){
+    const h=(+m[1])+(+m[2])/60;
+    const open=(typeof openHour==='function')?openHour():10;
+    if(h<=open+1) return 1;
+    if(h<=open+3) return 2;
+    return 3;
+  }
+  return 1;                       /* unknown is on now, never hidden */
+}
+/* The leader's own half of the day. The opener runs the first shift, the
+   closer the last, and the mid belongs to whoever is standing there. */
+function myRanks(){ return (S.shift==='CLOSING')?[2,3]:[1,2]; }
+function onWithMe(name){
+  const r=schedRow(name);
+  if(!r) return true;             /* not on the schedule: show them with you */
+  return myRanks().indexOf(shiftRank(r))>-1;
+}
+function shiftWord(name){
+  const r=schedRow(name); if(!r) return '';
+  const c=String(r.code||'').trim().toUpperCase();
+  return SHIFT_WORD[c]||'';
+}
+
 /* ── The chips ─────────────────────────────────────────────────────────── */
 /* With a published schedule this is a confirmation, not data entry: the
    people who are supposed to be here are already on screen, greyed until
@@ -4486,24 +4535,33 @@ function buildCheckin(crew){
   const sched=schedOn();
   let h='';
   if(sched){
-    const plan=schedToday().length;
-    const allIn=crew.filter(function(c){ return schedIs(c.name)&&S.crewin[c.name]; }).length===plan;
-    h+='<div class="schhead"><b>Scheduled today</b><span>'+plan+' on the schedule'+
-       ((SCHED&&SCHED.by)?', published by '+esc(SCHED.by):'')+'</span></div>';
-    h+='<div class="chiprow">';
-    /* schedule order first, so the chips read like the schedule does */
-    const seen={};
+    /* Split the day at the leader's own shift. Theirs first, the rest below
+       under a heading that says when they are due, so a name is never missing,
+       only further down. */
+    const mine=[], later=[], seen={};
     schedToday().forEach(function(r){
       const row=crew.filter(function(c){ return nk(c.name)===nk(r.name); })[0];
       const nm=row?row.name:String(r.name).trim();
       seen[nk(nm)]=1;
-      h+=chipFor(nm,true);
+      (onWithMe(nm)?mine:later).push(nm);
     });
+    const plan=mine.length;
+    const allIn=plan&&mine.filter(function(n){ return S.crewin[n]; }).length===plan;
+    const lateWord=(S.shift==='CLOSING')?'Was in earlier':'Comes in later';
+    h+='<div class="schhead"><b>On with you</b><span>'+plan+' of '+schedToday().length+
+       ' on today’s schedule'+((SCHED&&SCHED.by)?', published by '+esc(SCHED.by):'')+'</span></div>';
+    h+='<div class="chiprow">';
+    mine.forEach(function(nm){ h+=chipFor(nm,true); });
     const rest=crew.filter(function(c){ return !seen[nk(c.name)]; });
     h+='<button type="button" class="chip all" data-crewall="1">'+
        (allIn?'Clear all':'✓ Everyone here')+'</button>';
     h+='<button type="button" class="chip add" data-crewadd="open">+ Someone came in</button>';
     h+='</div>';
+    if(later.length){
+      h+='<div class="schhead off"><b>'+esc(lateWord)+'</b><span>'+
+         'tap them when they are on the floor</span></div><div class="chiprow">'+
+         later.map(function(nm){ return chipFor(nm,true); }).join('')+'</div>';
+    }
     /* The rest of the store is still one tap away, but under its own heading,
        so a leader reading down the chips is never unsure which list is which. */
     if(rest.length){
@@ -4541,7 +4599,8 @@ function chipFor(name,isSched){
   const on=!!S.crewin[name];
   const why=(S.crewout||{})[name];
   const out=(!on&&why);
-  const hrs=isSched?schedHours(name):'';
+  const word=isSched?shiftWord(name):'';
+  const hrs=isSched?(word||schedHours(name)):'';
   let cls='chip'+(on?' on':'')+(out?' out':'')+(isSched&&!on&&!out?' sch':'')+(!isSched&&!on?' extra':'');
   return '<button type="button" class="'+cls+'" data-crewin="'+escA(name)+'">'+esc(name)+
     (hrs?'<em>'+esc(hrs)+'</em>':'')+(out?'<em>'+esc(why)+'</em>':'')+'</button>';
@@ -5924,7 +5983,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.crewall){ const all=crewRows();
     /* With a schedule up this is "everyone here", which means the people who
        were scheduled, not every consultant on the payroll. */
-    const plan=schedOn()?all.filter(c=>schedIs(c.name)):all;
+    const plan=schedOn()?all.filter(c=>schedIs(c.name)&&onWithMe(c.name)):all;
     const on=plan.length&&plan.filter(c=>S.crewin[c.name]).length===plan.length;
     S.crewout=S.crewout||{};
     if(on){ plan.forEach(c=>{ delete S.crewin[c.name]; }); rosterLog('cleared','all',''); }
