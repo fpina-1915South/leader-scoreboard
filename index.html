@@ -4364,6 +4364,9 @@ function schedIs(name){ return !!schedRow(name); }
 /* "9:30 to 7", the way a leader says it, not 09:30:00. */
 function schedHours(name){
   const r=schedRow(name); if(!r) return '';
+  /* The Scheduler's own shift letter where there is no clock time, because
+     that is what the leader reads on their schedule anyway. */
+  if(!r.start&&!r.end) return String(r.code||'').slice(0,6);
   const t=function(v){
     const m=String(v||'').match(/^(\d{1,2}):?(\d{2})?/); if(!m) return '';
     let h=parseInt(m[1],10); const mi=m[2]||'00';
@@ -7467,21 +7470,51 @@ function ssPair(a,b,rawB){
   }
   return {start:a,end:b};
 }
-/* One person's entry for one day of the week, whatever shape it is in. */
+/* The Scheduler does not store times. It stores its own shift codes, one per
+   day per person, and the times behind a letter come from that store's own
+   templates and opening hours:
+
+     ""            not working
+     "O" "C" "M"   the store's opening, closing and mid templates
+     "S" "S2" "F"  the other templates a leader can pick
+     "PTO"         off
+     "X:8.5-18"    a custom shift, in decimal hours, so 8.5 is half eight
+
+   Resolving a letter to a time means reimplementing the Scheduler's template
+   maths against every store's hours, and getting that subtly wrong would put
+   a wrong time on a leader's screen. The board does not need the time: it
+   needs to know who is on, and the letter is what the leader already reads on
+   their own schedule. So a code travels as a code, a custom shift travels as
+   real times, and nothing is invented.
+
+   Anything that is not plainly off counts as working. An extra greyed name
+   the leader does not confirm costs one tap. A missing name is the failure
+   that had five pilot shifts coaching nobody. */
+const SS_OFF=/^(off|pto|x|-|\u2013|n\/a|none)$/i;
+/* 8.5 is half eight, 9.25 is quarter past nine. */
+function ssDec(v){
+  const n=parseFloat(v); if(!isFinite(n)||n<0||n>24) return '';
+  let h=Math.floor(n), m=Math.round((n-h)*60);
+  if(m>=60){ h+=1; m-=60; }
+  if(h>23) return '';
+  return ('0'+h).slice(-2)+':'+('0'+m).slice(-2);
+}
 function ssDay(p,di){
-  const d=(Array.isArray(p.days)?p.days[di]:null);
-  if(d==null||d==='') return null;
-  if(typeof d==='string'){
-    if(/^(off|pto|x|-)$/i.test(d.trim())) return null;
-    const parts=d.split(/\s*(?:-|to|–)\s*/);
-    const a=ssTime(parts[0]), b=ssTime(parts[1]);
-    return (a||b)?ssPair(a,b,parts[1]):null;
+  const raw=(Array.isArray(p.days)?p.days[di]:null);
+  if(raw==null) return null;
+  if(typeof raw==='object'){
+    if(raw.off===true||SS_OFF.test(String(raw.type||raw.code||''))) return null;
+    const rawB=(raw.out!=null?raw.out:raw.end);
+    const a=ssTime(raw.in!=null?raw.in:raw.start), b=ssTime(rawB);
+    return (a||b)?ssPair(a,b,rawB):null;
   }
-  if(typeof d!=='object') return null;
-  if(d.off===true||/^(off|pto)$/i.test(String(d.type||d.code||''))) return null;
-  const rawB=(d.out!=null?d.out:d.end);
-  const a=ssTime(d.in!=null?d.in:d.start), b=ssTime(rawB);
-  return (a||b)?ssPair(a,b,rawB):null;
+  const t=String(raw).trim();
+  if(!t||SS_OFF.test(t)) return null;
+  const x=t.match(/^X\s*:\s*([0-9.]+)\s*-\s*([0-9.]+)$/i);
+  if(x){ const o=ssPair(ssDec(x[1]),ssDec(x[2]),''); o.code=''; return o; }
+  const r=t.match(/^(\d{1,2}(?::\d{2})?\s*[ap]?m?)\s*(?:-|to|\u2013)\s*(\d{1,2}(?::\d{2})?\s*[ap]?m?)$/i);
+  if(r){ const o=ssPair(ssTime(r[1]),ssTime(r[2]),r[2]); o.code=''; return o; }
+  return {start:'', end:'', code:t};        /* a template code: they are on */
 }
 function ssWeekDays(doc){
   const week=String(doc.week||'').slice(0,10);
@@ -7496,7 +7529,7 @@ function ssWeekDays(doc){
       const nm=String(p.name||'').trim();
       if(!nm||/^open$/i.test(nm)) return;        /* an unfilled seat is not a person */
       const t=ssDay(p,di); if(!t) return;
-      rows.push({name:nm, role:String(p.role||''), start:t.start, end:t.end});
+      rows.push({name:nm, role:String(p.role||''), start:t.start, end:t.end, code:t.code||''});
     });
     if(rows.length) days[iso]=rows;
   }
