@@ -2339,6 +2339,26 @@ function dictate(btn,sel){
 const BAKED = null;   /* replaced at build time, do not edit by hand */
 
 const DK='1915_leaderday_data';
+/* ── WHERE EACH SLOT CAME FROM ─────────────────────────────────────────
+   The master signs in and picks a store like anybody else, so it pulls that
+   one store's slice down into DATA. Load one file over the top and DATA is
+   now a mixture: one real file covering 41 stores, and seven slices covering
+   one. Pushing that wrote a full document per store, which would have handed
+   40 of them the new file and an empty everything else.
+
+   So each slot remembers whether it holds a file the master loaded or a slice
+   that came down from the cloud. A push sends the files, and for every slot it
+   does not have a file for it keeps whatever that store already had. That also
+   makes the useful thing safe: load one report, push it, change nothing else.
+   ──────────────────────────────────────────────────────────────────────── */
+const SRCK='1915_leaderday_src';
+var SLOT_SRC={};
+function srcLoad(){ try{ SLOT_SRC=JSON.parse(localStorage.getItem(SRCK)||'{}')||{}; }catch(e){ SLOT_SRC={}; } }
+function srcSave(){ try{ localStorage.setItem(SRCK,JSON.stringify(SLOT_SRC)); }catch(e){} }
+function srcSet(slot,where){ SLOT_SRC[slot]=where; srcSave(); }
+function srcIsFile(slot){ return SLOT_SRC[slot]==='file'; }
+function fileSlots(){ return SB_SLOTS.filter(srcIsFile); }
+const SB_SLOTS=['store','crew','crewWtd','crewDay','carts','roster','leaders','goals'];
 let DATA={store:null,crew:null,crewWtd:null,crewDay:null,roster:null,leaders:null,carts:null,goals:null};
 function dataSave(){
   try{ localStorage.setItem(DK,JSON.stringify(DATA)); }
@@ -5543,7 +5563,7 @@ async function pushCloud(btn){
     const r=await fbPutData(function(i,n,lab){
       btn.textContent='Pushing '+i+' of '+n+'\u2026';
     });
-    let msg=r.sent+' store'+(r.sent===1?'':'s')+' updated for '+r.day;
+    let msg=r.sent+' store'+(r.sent===1?'':'s')+' updated \u00b7 '+(r.slots||[]).join(', ');
     if(r.empty.length) msg+=' \u00b7 '+r.empty.length+' had no rows';
     if(r.big.length)   msg+=' \u00b7 TOO BIG: '+r.big.join(', ');
     if(r.failed.length)msg+=' \u00b7 FAILED: '+r.failed.join(', ');
@@ -5696,6 +5716,19 @@ function schedCard(){
   h+='</div></div>';
   return h;
 }
+/* Say what a push is about to change before it changes it. A push now only
+   carries the files that are loaded, so a leader's other numbers are safe, and
+   that is worth saying out loud rather than leaving to be trusted. */
+function pushWhat(){
+  const f=fileSlots();
+  if(!f.length) return '<p class="admnote bad">Nothing loaded from a file. '+
+    'The numbers on this screen came down from the cloud for one store, so there '+
+    'is nothing to send.</p>';
+  const names=f.map(function(k){ return String(SLOT_NAME[k]||k).toLowerCase(); });
+  const rest=SB_SLOTS.filter(function(k){ return f.indexOf(k)<0; });
+  return '<p class="admnote"><b>This push sends:</b> '+esc(names.join(', '))+'.'+
+    (rest.length?(' Everything else stays exactly as each store already has it.'):'')+'</p>';
+}
 function admRender(){
   document.getElementById('admbody').innerHTML=
     admGuide()+
@@ -5703,10 +5736,11 @@ function admRender(){
     slotCard('carts')+slotCard('roster')+slotCard('leaders')+
     schedCard()+
     '<div class="grp"><h2 style="cursor:default">Send it to the stores<span>'+
-      (DATA.store||DATA.crew||DATA.crewWtd||DATA.crewDay?'ready':'load a file first')+'</span></h2><div class="numpad">'+
+      (fileSlots().length?'ready':'load a file first')+'</span></h2><div class="numpad">'+
       '<p class="admnote">Sends today\u2019s numbers to every store at once. Leaders open the '+
       'same address on a phone or a tablet, sign in, and the new day is there. '+
       'Nothing to send, nothing to re-send tomorrow.</p>'+
+      pushWhat()+
       '<button type="button" class="filebtn" data-pushcloud="1">Push to cloud</button>'+
       '<p class="admnote" style="margin-top:14px">The old way, for a tablet with no signal: '+
       'freezes the numbers into a copy of this file that you send out by hand.</p>'+
@@ -5720,7 +5754,7 @@ const CSVIN=document.getElementById('csvInput');
 function takeFile(text,slot,name,note){
   const res=ingest(text,slot,name);
   if(res.err){ toast(res.err); return; }
-  DATA[slot]=res; dataSave(); admRender();
+  DATA[slot]=res; srcSet(slot,'file'); dataSave(); admRender();
   toast(res.rows.length+' row'+(res.rows.length===1?'':'s')+' loaded'+
     (note?' from '+note:'')+
     (res.blocked.length?', '+res.blocked.length+' pay column'+(res.blocked.length===1?'':'s')+' refused':''));
@@ -7180,18 +7214,21 @@ function sbPack(p,keep){
    same matcher the board already uses. Splitting here rather than in a script
    is the point: one rule, one place, no chance of the cloud copy and the
    screen disagreeing about who works where. */
-function sbSplitOne(lab){
+/* onlyFiles true leaves out any slot that is a slice rather than a file, so a
+   push can never send one store's numbers to the other forty. */
+function sbSplitOne(lab,onlyFiles){
   const byStore =function(r){ return matchStore(r.store)===lab; };
   const byPerson=function(r){ return rosterStore(r.name)===lab; };
+  const take=function(slot){ return (onlyFiles&&!srcIsFile(slot))?null:DATA[slot]; };
   const d={};
-  d.store =sbPack(DATA.store ,byStore);
-  d.crew  =sbPack(DATA.crew  ,byPerson);
-  d.crewWtd=sbPack(DATA.crewWtd,byPerson);
-  d.crewDay=sbPack(DATA.crewDay,byPerson);
-  d.carts =sbPack(DATA.carts ,byStore);
-  d.roster=sbPack(DATA.roster,byStore);
-  d.leaders=sbPack(DATA.leaders,byStore);
-  d.goals =sbPack(DATA.goals ,byStore);
+  d.store =sbPack(take('store') ,byStore);
+  d.crew  =sbPack(take('crew')  ,byPerson);
+  d.crewWtd=sbPack(take('crewWtd'),byPerson);
+  d.crewDay=sbPack(take('crewDay'),byPerson);
+  d.carts =sbPack(take('carts') ,byStore);
+  d.roster=sbPack(take('roster'),byStore);
+  d.leaders=sbPack(take('leaders'),byStore);
+  d.goals =sbPack(take('goals') ,byStore);
   Object.keys(d).forEach(function(k){ if(!d[k]) delete d[k]; });
 
   /* The rolling window follows the people, not the store, so it is trimmed
@@ -7201,6 +7238,7 @@ function sbSplitOne(lab){
     const p=d[k]; if(p) p.rows.forEach(function(r){ const key=nk(r.name); if(key) names[key]=1; });
   });
   const hist={};
+  if(onlyFiles && SLOT_SRC.hist==='cloud') return {data:d, hist:null};
   Object.keys(HIST||{}).forEach(function(span){
     const h=HIST[span]; if(!h||!h.rows) return;
     const rows={}; let n=0;
@@ -7216,24 +7254,49 @@ function sbDay(){
 /* Writes every store, one document each, and says plainly what happened.
    A store whose slice will not fit is named rather than quietly truncated:
    half a store's numbers is worse than none. */
+/* Writes every store, one document each, and says plainly what happened.
+   A store whose slice will not fit is named rather than quietly truncated:
+   half a store's numbers is worse than none.
+
+   Only the slots the master actually has a file for are written. Everything
+   else is read back off that store's own document and put down again
+   untouched, so pushing one report changes one report. The alternative, which
+   this replaces, would hand 40 stores an empty day the first time somebody
+   loaded a single file and pushed. */
 async function fbPutData(onStep){
   if(!FB_ON) throw new Error('Firebase is not configured on this copy.');
   if(!signedIn()) throw new Error('Sign in first.');
-  if(!DATA.store&&!DATA.crew&&!DATA.crewWtd&&!DATA.crewDay) throw new Error('Load at least one file first.');
+  const files=fileSlots();
+  if(!files.length) throw new Error('Load a file first. Nothing here came from one.');
   const day=sbDay(), built=new Date().toISOString(), who=fbWho();
-  const out={sent:0, empty:[], big:[], failed:[], day:day};
+  const out={sent:0, empty:[], big:[], failed:[], day:day, slots:files, kept:0};
   const codes=STORES.map(sbCode).filter(Boolean);
   for(let i=0;i<codes.length;i++){
     const code=codes[i];
     const lab=STORES.filter(function(s){ return sbCode(s)===code; })[0];
     if(onStep) onStep(i+1,codes.length,lab);
-    const pack=sbSplitOne(lab);
-    const rows=Object.keys(pack.data).reduce(function(n,k){ return n+pack.data[k].rows.length; },0);
+    const pack=sbSplitOne(lab,true);
+    /* What that store already has, for every slot this push is not carrying. */
+    let had=null;
+    try{ had=await fbGetData(code); }
+    catch(e){ out.failed.push(lab+' (could not read what it had)'); continue; }
+    if(had){
+      SB_SLOTS.forEach(function(k){
+        if(pack.data[k]) return;                    /* a file is replacing it */
+        if(had.data&&had.data[k]) { pack.data[k]=had.data[k]; out.kept++; }
+      });
+      if(pack.hist==null) pack.hist=had.hist||{};
+    }
+    if(pack.hist==null) pack.hist={};
+    const rows=Object.keys(pack.data).reduce(function(n,k){ return n+(pack.data[k].rows||[]).length; },0);
     if(!rows){ out.empty.push(lab); continue; }
     const json=JSON.stringify(pack);
     if(json.length>SB_CAP){ out.big.push(lab); continue; }
+    /* The day stamp belongs to the daily report. A budget-only push must not
+       claim the store's numbers are from today. */
+    const stamp=srcIsFile('store')?day:((had&&had.day)||day);
     try{
-      await fbWrite(SB_COL+'/'+code,{code:code, store:lab, day:day, built:built, by:who, json:json});
+      await fbWrite(SB_COL+'/'+code,{code:code, store:lab, day:stamp, built:built, by:who, json:json});
       out.sent++;
     }catch(e){ out.failed.push(lab+' ('+String(e.message||e).slice(0,60)+')'); }
   }
@@ -7294,6 +7357,9 @@ async function cloudPull(force){
     DATA=Object.assign({store:null,crew:null,crewWtd:null,crewDay:null,
                         roster:null,leaders:null,carts:null,goals:null},got.data);
     HIST=got.hist||{};
+    /* Everything that arrived this way is one store's slice, not a file. */
+    SB_SLOTS.forEach(function(k){ if(got.data[k]) srcSet(k,'cloud'); });
+    srcSet('hist','cloud');
     reapplyGoals();
     dataSave(); histSave();
     CLOUD={state:'ok',code:code,day:got.day,built:got.built,msg:''};
@@ -8065,7 +8131,7 @@ document.addEventListener('visibilitychange',function(){
 });
 
 /* ───────── INIT ───────── */
-buildStores(); buildDates(); dataLoad(); oneLoad(); histLoad(); authLoad(); schedLoad(); sslLoad();
+buildStores(); buildDates(); srcLoad(); dataLoad(); oneLoad(); histLoad(); authLoad(); schedLoad(); sslLoad();
 restore(); if(S.shift) metSeed(); render(); photoLoad(); signWire(); whoLabel(); syncLabel();
 cloudBand(); cloudPull(); schedPull();
 gearPaint();
