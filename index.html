@@ -7354,12 +7354,18 @@ async function cloudPull(force){
   try{
     const got=await fbGetData(code);
     if(!got){ CLOUD={state:'none',code:code,day:'',built:'',msg:''}; cloudBand(); CLOUD_BUSY=false; return; }
+    /* A slice must not land on top of a file. The master loads a report, the
+       page reloads for any reason, and the pull would otherwise hand back one
+       store's numbers over the file that was sitting there, which is how the
+       budget went missing twice before this. A tablet has no files, so nothing
+       changes there. */
+    const keep={};
+    SB_SLOTS.forEach(function(k){ if(srcIsFile(k)&&DATA[k]) keep[k]=DATA[k]; });
     DATA=Object.assign({store:null,crew:null,crewWtd:null,crewDay:null,
                         roster:null,leaders:null,carts:null,goals:null},got.data);
-    HIST=got.hist||{};
-    /* Everything that arrived this way is one store's slice, not a file. */
-    SB_SLOTS.forEach(function(k){ if(got.data[k]) srcSet(k,'cloud'); });
-    srcSet('hist','cloud');
+    SB_SLOTS.forEach(function(k){ if(got.data[k]&&!keep[k]) srcSet(k,'cloud'); });
+    Object.keys(keep).forEach(function(k){ DATA[k]=keep[k]; });
+    if(SLOT_SRC.hist!=='file'){ HIST=got.hist||{}; srcSet('hist','cloud'); }
     reapplyGoals();
     dataSave(); histSave();
     CLOUD={state:'ok',code:code,day:got.day,built:got.built,msg:''};
