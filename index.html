@@ -1928,6 +1928,24 @@ function renderShots(k){
   });
 }
 
+/* A shift was reported stuck at 26 of 27 with nothing flagged and nothing
+   unanswered. The leader had twenty guest opportunities and closed none of
+   them, which is a real result and a real zero. The counter on his screen
+   read 0, which was correct, but nothing had ever been stored, and the test
+   was truthiness: 0 and undefined both read as blank, so the numbers block
+   could never be satisfied by a leader who closed nothing. He could not have
+   finished that list no matter how long he looked.
+
+   Zero is an answer. The test is whether a value is there, not whether it is
+   non-zero, and the counters now hold the zero they are already showing. */
+function metFilled(v){ return String(v==null?'':v).trim()!==''; }
+const MET_COUNTERS=['opps','closes','carts','finapp','protconv','protsold','bedconv','bedsold','ticket'];
+function metSeed(){
+  ['openm','eod'].forEach(function(sc){
+    S[sc]=S[sc]||{};
+    MET_COUNTERS.forEach(function(k){ if(S[sc][k]==null||S[sc][k]==='') S[sc][k]='0'; });
+  });
+}
 function totals(){
   let done=0,total=0;
   activeList().forEach((g,gi)=>{ if(g.aor)return;
@@ -1939,9 +1957,9 @@ function totals(){
   total++; if((S.reflect||'').trim())done++;                        // day reflection
   const core=['goal','revenue','opps','closes'];
   if(S.shift==='OPENING'){ total++;                                 // handoff metrics count as one
-    if(core.every(k=>(S.openm[k]||'').toString().trim()))done++; }
+    if(core.every(k=>metFilled(S.openm[k])))done++; }
   if(S.shift==='CLOSING'){ total++;                                 // EOD sales metrics count as one
-    if(core.every(k=>(S.eod[k]||'').toString().trim()))done++; }
+    if(core.every(k=>metFilled(S.eod[k])))done++; }
   return {done,total};
 }
 /* The collapsed line has to say enough that a leader never needs to open it
@@ -4479,7 +4497,7 @@ function leftItems(){
   const core=[['goal','Goal'],['revenue','Revenue'],['opps','Opportunities'],['closes','Closes']];
   const scope=(S.shift==='CLOSING')?'eod':'openm';
   const src=(scope==='eod')?S.eod:S.openm;
-  const miss=core.filter(function(c){ return !String(src[c[0]]==null?'':src[c[0]]).trim(); });
+  const miss=core.filter(function(c){ return !metFilled(src[c[0]]); });
   if(miss.length)
     out.push({label:miss.map(function(c){ return c[1]; }).join(', ')+' still blank',
               where:(scope==='eod')?'End of day numbers':'Handoff numbers',
@@ -5149,6 +5167,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.shift){ S.shift=t.dataset.shift; S.header.shift=S.shift;
     document.getElementById('btn-open').classList.toggle('on',S.shift==='OPENING');
     document.getElementById('btn-close').classList.toggle('on',S.shift==='CLOSING');
+    metSeed();
     render(); save(); }
   else if(t.dataset.ck){ const id=t.dataset.ck, on=(S.items[id]==='ok');
     S.items[id]=on?'':'ok'; delete S.ex[id];
@@ -5955,7 +5974,7 @@ function recordDetail(x,thumbs){
   }
 
   out.push('<div class="foot">1915 South Leader Daily Checklist. Record generated on the tablet at completion. '+
-    'Contains guest information: store behind authentication, do not post to a public host.<br>'+
+    'No guest is named anywhere in this record. Guest service is logged by ticket number.<br>'+
     'Thumbnails are downscaled for readability. Full-resolution photos live in Leader Daily Media.</div>');
   return out.join('');
 }
@@ -6818,7 +6837,7 @@ document.addEventListener('visibilitychange',function(){
 
 /* ───────── INIT ───────── */
 buildStores(); buildDates(); dataLoad(); oneLoad(); histLoad(); authLoad();
-restore(); render(); photoLoad(); signWire(); whoLabel(); syncLabel();
+restore(); if(S.shift) metSeed(); render(); photoLoad(); signWire(); whoLabel(); syncLabel();
 cloudBand(); cloudPull();
 gearPaint();
 /* Nothing is asked of a leader until they have actually started a shift, and
