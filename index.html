@@ -870,6 +870,10 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   letter-spacing:.3px;padding-left:10px;white-space:nowrap;}
 .grp.cash h2{background:#244A58;}
 .grp.cash.needs h2{background:var(--orange);}
+.row.cashrow .ck.go{background:var(--icy);border-color:var(--blue);color:var(--navy);
+  font-weight:800;font-size:13px;letter-spacing:.02em;width:auto;padding:0 12px;}
+.row.cashrow.ok .ck.go{background:var(--navy);border-color:var(--navy);color:#fff;}
+
 .filebtn.ghost{background:#fff;color:#56656b;border:1px solid var(--line);}
 .grp.duepull h2{background:var(--orange);}
 /* the published schedule, and the exceptions to it */
@@ -1070,7 +1074,7 @@ const OPENING = [
  {aor:true},
  {g:'{RPT} · RUN THE REPORTS', el:'Element 5 · Back Office Controls', items:[
    ['EMAIL','CAUGHT UP BEFORE OPEN'],
-   ['CASH DRAWER','COUNTED & VERIFIED AT OPEN'],
+   ['CASH DRAWER','COUNTED & VERIFIED AT OPEN','','cash'],
    ['VAMOO — SOONERS · ESTIMATES · ASAP · PICKUPS','ALL WORKED'],
    ['FLYERS','STOCKED — EVERY GUEST, EVERY TIME']]},
  {g:'{TEAM} · TEAM START', el:'Element 1 · Sales Culture', items:[
@@ -1102,7 +1106,7 @@ const CLOSING = [
    ['LIGHTS & TECH','OFF PER PROCEDURE'],
    ['DOORS & ALARM','SECURED & SET']]},
  {g:'CLOSE-OUT', el:'Element 5 · Back Office Controls', items:[
-   ['CASH DRAWER','COUNTED & VERIFIED AT CLOSE'],
+   ['CASH DRAWER','COUNTED & VERIFIED AT CLOSE','','cash'],
    ['TIME CLOCK','MANAGED & COMPLETE — PUNCHES CORRECTED IN PAYLOCITY'],
    ['EMAIL','CLEARED BEFORE YOU LEAVE']]}
 ];
@@ -1236,8 +1240,8 @@ function activeAors(){
 }
 function groupStat(grp,gi){
   if(grp.attest){ return {done:S.items[itemId(gi,'a')]?1:0, total:1}; }
-  let d=0; grp.items.forEach((_,ii)=>{ if(S.items[itemId(gi,ii)]) d++; });
-  return {done:d, total:grp.items.length};
+  let d=0; grp.items.forEach((it,ii)=>{ if(isCashRow(it)) return; if(S.items[itemId(gi,ii)]) d++; });
+  return {done:d, total:grp.items.filter(function(it){ return !isCashRow(it); }).length};
 }
 /* Minutes past midnight for a group whose title starts with a clock time. */
 function groupMinutes(title){
@@ -1274,6 +1278,35 @@ function syncCloseUI(){
   if(b) b.textContent='CLOSING · '+t.MID+' & '+t.CLOSE+' CHECKPOINTS';
 }
 function itemId(gi,ii){return S.shift+'-'+gi+'-'+ii;}
+/* ── THE CASH ROW IS A POINTER, NOT A TICK ─────────────────────────────
+   The checklist carried a plain CASH DRAWER tick from before the count
+   existed, so cash was in the shift twice: once as a real count with the
+   arithmetic behind it, and once as a box a leader could tick without
+   counting anything. That is the same empty claim as the floor discipline
+   attestation that came out in October.
+
+   The row stays where leaders look for it at the reports checkpoint, but it
+   cannot be ticked by hand. It takes them to the count, and it ticks itself
+   from the count. It is not counted toward the total either, because the
+   count already is: one job, one slot. */
+function isCashRow(it){ return !!(it&&it[3]==='cash'); }
+function cashRowId(){
+  const list=activeList(); let id='';
+  list.forEach(function(g,gi){
+    if(g.aor||g.attest||!g.items) return;
+    g.items.forEach(function(it,ii){ if(isCashRow(it)) id=itemId(gi,ii); });
+  });
+  return id;
+}
+/* Keep the row's state equal to the count, so the record and the group
+   header read right without anybody ticking anything. */
+function cashSync(){
+  const id=cashRowId(); if(!id) return;
+  const want=cashDone()?'ok':'';
+  if((S.items[id]||'')!==want){
+    if(want) S.items[id]=want; else delete S.items[id];
+  }
+}
 
 function render(){
   const host=document.getElementById('list');host.innerHTML='';
@@ -1327,6 +1360,17 @@ function render(){
       grp.items.forEach((it,ii)=>{
         const id=itemId(gi,ii), st=S.items[id]||'';
         const row=el('div','row'+(st==='ok'?' ok':st==='flag'?' flagged':''));
+        if(isCashRow(it)){
+          const done=cashDone();
+          row.className='row cashrow'+(done?' ok':'');
+          row.innerHTML='<div class="lbl"><b>'+subT(it[0])+'</b> <i>\u2014 '+
+            (done?('counted, '+money(cashCounted(S.shift==='CLOSING'?'pm':'am'))):
+                  'count it below, this ticks itself')+'</i></div>'+
+            '<div class="btns"><button type="button" class="ck go" data-cashgo="1">'+
+            (done?'\u2713':'Count')+'</button></div>';
+          body.appendChild(row);
+          return;
+        }
         row.innerHTML=`<div class="lbl"><b>${subT(it[0])}</b> <i>— ${subT(it[1])}</i></div>
           <div class="btns"><button type="button" class="ck" data-ck="${id}">✓</button>
           <button type="button" class="fg" data-fg="${id}">⚑</button></div>`;
@@ -1364,6 +1408,7 @@ function render(){
   if(S.shift==='CLOSING') host.appendChild(buildEOD());
   host.appendChild(buildImpact());
   host.appendChild(buildReflection());
+  cashSync();
   activeAors().forEach(x=>renderShots(aorKey(x.ai)));
   renderQuick();
   updateProg();
@@ -2226,7 +2271,8 @@ function totals(){
   let done=0,total=0;
   activeList().forEach((g,gi)=>{ if(g.aor)return;
     if(g.attest){ total++; if(S.items[itemId(gi,'a')])done++; return; }
-    g.items.forEach((_,ii)=>{total++;if(S.items[itemId(gi,ii)])done++;}); });
+    g.items.forEach((it,ii)=>{ if(isCashRow(it)) return;      /* the count below carries it */
+      total++; if(S.items[itemId(gi,ii)])done++; }); });
   activeAors().forEach(x=>{total++;if((S.aor[aorKey(x.ai)]||{}).status)done++;});
   /* Who is working today. Required, because every consultant card, every
      coaching touch and the whole scoreboard hang off it, and five pilot
@@ -5152,6 +5198,7 @@ function leftItems(){
       return;
     }
     g.items.forEach(function(it,ii){
+      if(isCashRow(it)) return;                 /* named by the cash count itself */
       if(!S.items[itemId(gi,ii)])
         out.push({label:subT(it[0]), where:subT(g.g).replace(/^\d{1,2}:\d{2}\s*[·-]?\s*/,''), jump:gi});
     });
@@ -5991,6 +6038,7 @@ document.addEventListener('click',e=>{
     S.ui.crewout=''; render(); save(); return; }
   if(t.dataset.pick){ csvTarget=t.dataset.pick; document.getElementById('csvInput').click(); return; }
   if(t.dataset.admhelp){ S.ui.admhelp=(S.ui.admhelp==='open')?'':'open'; save(); admRender(); return; }
+  if(t.dataset.cashgo){ gotoSel('#cq-'+(S.shift==='CLOSING'?'pm':'am')+'-pennies'); return; }
   if(t.dataset.publish){ publishCopy(); return; }
   if(t.dataset.sslink){ ssLink(t); return; }
   if(t.dataset.sspull){ ssPullNow(t); return; }
