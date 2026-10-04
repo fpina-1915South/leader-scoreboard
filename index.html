@@ -34,7 +34,7 @@ html{scroll-padding-top:300px;scroll-padding-bottom:120px;}
   color:var(--muted);font-weight:800;margin:0 0 3px 2px;}
 .signbox input{width:100%;min-height:50px;border:1px solid var(--line);border-radius:10px;
   padding:12px;font-size:16px;font-family:inherit;margin-bottom:11px;}
-.signbox input:focus{outline:2px solid var(--blue);outline-offset:-1px;}
+.signbox input:focus{outline:2px solid var(--navy2);outline-offset:-1px;}
 .signerr{min-height:17px;font-size:12px;color:var(--flag);font-weight:700;margin-bottom:6px;}
 .signbtns{display:flex;gap:9px;}
 .signbtns button{flex:1;min-height:50px;border:none;border-radius:10px;background:var(--navy);
@@ -42,7 +42,7 @@ html{scroll-padding-top:300px;scroll-padding-bottom:120px;}
 .signbtns button.ghost{background:#fff;border:1.5px solid var(--line);color:var(--muted);flex:0 0 38%;}
 .signbtns button[disabled]{opacity:.6;}
 .signnew{width:100%;min-height:48px;margin-top:9px;border:1px dashed var(--line);
-  border-radius:10px;background:#fff;color:var(--blue);font-size:13px;font-weight:700;
+  border-radius:10px;background:#fff;color:var(--navy2);font-size:13px;font-weight:700;
   font-family:inherit;cursor:pointer;letter-spacing:.2px;}
 .signnew[disabled]{opacity:.6;}
 .signnote{margin:12px 0 0 !important;font-size:11px !important;}
@@ -808,7 +808,7 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .cxtally span{font-size:11.5px;color:var(--muted);}
 .cxsave{width:100%;min-height:46px;margin-top:9px;border:none;border-radius:9px;
   background:var(--navy);color:#fff;font-size:14px;font-weight:700;letter-spacing:.4px;cursor:pointer;}
-.cxsave:active{background:var(--blue);}
+.cxsave:active{background:var(--navy2);}
 .cx.logged{padding:0;background:none;border:none;}
 .cxdone{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
   border-left:4px solid var(--orange);border-radius:9px;padding:10px 10px 10px 12px;margin:0 0 8px;}
@@ -827,7 +827,7 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .noact{background:var(--bg);border-radius:8px;padding:10px 11px;margin:10px 0 2px;
   font-size:12.5px;color:var(--muted);line-height:1.6;}
 .noact.thin{font-size:11.5px;padding:7px 10px;margin:8px 0 6px;}
-.shapenote{background:#F4F8FA;border-left:3px solid var(--blue);border-radius:0 6px 6px 0;
+.shapenote{background:#F4F8FA;border-left:3px solid var(--navy2);border-radius:0 6px 6px 0;
   padding:8px 10px;margin:8px 0 0;font-size:11.5px;color:var(--muted);line-height:1.6;}
 .shapenote b{color:var(--navy);}
 .ptrack{display:inline-block;font-size:9px;letter-spacing:.6px;text-transform:uppercase;
@@ -845,7 +845,7 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .grp.guide h2 span,.grp.guide h2 em{color:#BFD9E3;}
 .gbody{padding-top:4px;}
 .glist{margin:2px 0 10px;padding-left:20px;}
-.glist li{font-size:13px;line-height:1.5;color:var(--body);margin:0 0 9px;}
+.glist li{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
 .nowblk.leftb{background:var(--ice);border:1px solid #BFD9E3;border-radius:10px;padding:9px 10px 7px;margin-top:8px;}
 .nowblk.leftb h4{color:var(--navy);margin:0 0 6px;font-size:12px;letter-spacing:.4px;text-transform:uppercase;}
@@ -868,6 +868,96 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .onedue.go em{display:block;font-style:normal;font-size:11.5px;font-weight:600;color:#8A6A48;margin-top:2px;}
 .onedue.go i{font-style:normal;font-size:12.5px;font-weight:800;color:var(--orange);
   letter-spacing:.3px;padding-left:10px;white-space:nowrap;}
+.grp.cash h2{background:#244A58;}
+.grp.cash.needs h2{background:var(--orange);}
+.filebtn.ghost{background:#fff;color:#56656b;border:1px solid var(--line);}
+.grp.duepull h2{background:var(--orange);}
+/* the published schedule, and the exceptions to it */
+.schhead{display:flex;flex-direction:column;gap:2px;margin:2px 0 8px;}
+.schhead b{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--navy);}
+.schhead span{font-size:12px;color:#6b7a80;}
+.schhead.off{margin-top:12px;}
+.schhead.off b{color:#6b7a80;}
+.chip.sch{background:#fff;border-style:dashed;color:#56656b;}
+.chip.out{background:#f3e3e3;border-color:#b98585;color:#802020;text-decoration:line-through;}
+.chip.out em,.chip.sch em{text-decoration:none;}
+.chip em{display:block;font-style:normal;font-size:11px;opacity:.72;font-weight:600;}
+.chip.add{background:var(--icy);border-color:var(--blue);color:var(--navy);font-weight:700;}
+.chip.why{background:#fff;}
+.chip.skip{background:#eee;color:#555;}
+.whyrow,.addrow{margin-top:9px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fbfcfd;}
+.addrow .cf.wide{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.addrow .cf.wide input{min-width:0;}
+.addrow .sb-go{margin-top:4px;min-height:46px;font-size:15px;font-weight:700;}
+
+.dgrid{margin:6px 0 2px;}
+.drow{display:flex;align-items:center;gap:8px;min-height:52px;border-bottom:1px solid #EDEDED;}
+.drow label{flex:1 1 auto;min-width:0;font-size:13.5px;font-weight:700;color:var(--navy);}
+.drow input{flex:0 0 76px;width:76px;min-width:0;min-height:46px;text-align:right;font-size:15px;
+  font-weight:700;border:1px solid #CFE2EA;border-radius:8px;padding:6px 8px;background:#fff;color:var(--navy);}
+.drow b{flex:0 0 78px;min-width:0;text-align:right;font-size:13.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums;}
+.drow.other input{flex:0 0 96px;width:96px;}
+.onote{display:block;width:100%;min-height:44px;margin:8px 0 0;padding:8px 10px;font-size:13.5px;
+  border:1px solid #CFE2EA;border-radius:8px;background:#fff;color:var(--navy);}
+.ctot{display:flex;justify-content:space-between;align-items:center;margin:10px 0 2px;
+  padding:11px 12px;background:var(--navy);color:#fff;border-radius:9px;}
+.ctot span{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#BFD9E3;}
+.ctot b{font-size:19px;}
+.cwho{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.cf{flex:1 1 180px;}
+.cf.wide{flex:1 1 100%;}
+.cf label{display:block;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#7A8C94;
+  font-weight:700;margin-bottom:3px;}
+.cf input{width:100%;min-height:44px;padding:8px 10px;font-size:14px;border:1px solid #CFE2EA;
+  border-radius:8px;background:#fff;color:var(--navy);}
+.droprow{display:flex;align-items:center;gap:6px;min-height:48px;}
+.droprow span{flex:0 0 62px;font-size:12.5px;font-weight:800;color:var(--navy);}
+.droprow input{min-height:46px;border:1px solid #CFE2EA;border-radius:8px;padding:6px 8px;
+  font-size:14px;background:#fff;color:var(--navy);}
+.droprow input[data-f="amt"]{flex:1 1 auto;min-width:0;text-align:right;font-weight:700;}
+.droprow input[data-f="mgr"],.droprow input[data-f="emp"]{flex:0 0 58px;width:58px;min-width:0;
+  text-align:center;text-transform:uppercase;}
+.recon{margin-top:4px;}
+.rr{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:46px;
+  border-bottom:1px solid #EDEDED;}
+.rr span{flex:1 1 auto;min-width:0;font-size:13.5px;font-weight:700;color:var(--navy);}
+.rr span em{display:block;font-style:normal;font-size:11px;font-weight:600;color:#7A8C94;
+  text-transform:uppercase;letter-spacing:.3px;margin-top:1px;}
+.rr b{font-size:15px;color:var(--navy);white-space:nowrap;}
+.rr input{flex:0 0 110px;width:110px;min-width:0;min-height:46px;text-align:right;font-size:15px;font-weight:700;
+  border:1px solid #CFE2EA;border-radius:8px;padding:6px 8px;background:#fff;color:var(--navy);}
+.rr.miss input{border-color:var(--orange);}
+.rr.sum{background:var(--ice);border-radius:8px;padding:6px 10px;border-bottom:none;margin:4px 0;}
+.rr.over{border-bottom:none;border-radius:9px;padding:10px 12px;margin-top:6px;}
+.rr.over.good{background:#E8F5EC;border:1.5px solid #3C8C5A;}
+.rr.over.good b{color:#226E42;font-size:19px;}
+.rr.over.bad{background:#FBE9E7;border:1.5px solid var(--flag);}
+.rr.over.bad b{color:var(--flag);font-size:19px;}
+.rr.over.wait{background:var(--bg);border:1.5px solid #D6D6D6;}
+.admnote.bad{color:var(--flag);font-weight:700;}
+.b-sub.short{background:var(--orange);border-color:var(--orange);color:#fff;}
+#surewrap{position:fixed;inset:0;background:rgba(16,40,50,.55);z-index:90;
+  display:none;align-items:center;justify-content:center;padding:18px;}
+#surewrap.open{display:flex;}
+.surebox{width:100%;max-width:460px;max-height:80vh;overflow:auto;background:#fff;
+  border-radius:14px;padding:18px 18px 16px;box-shadow:0 10px 40px rgba(16,40,50,.35);}
+.surebox h3{margin:0 0 6px;font-size:18px;font-weight:800;color:var(--navy);}
+.surebox p{margin:0 0 10px;font-size:13.5px;line-height:1.45;color:var(--ink);}
+.surelist{margin:0 0 8px;padding:0;list-style:none;}
+.surelist li{padding:8px 10px;margin-bottom:6px;background:var(--ice);border-radius:8px;}
+.surelist li b{display:block;font-size:13.5px;color:var(--navy);}
+.surelist li em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+.suremore{font-size:12.5px;color:var(--muted);}
+.surebtns{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.surebtns button{min-height:50px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;}
+.sb-go{background:var(--navy);color:#fff;border:1.5px solid var(--navy);}
+.sb-yes{background:#fff;color:var(--flag);border:1.5px solid var(--flag);}
+.grp.roster.needs h2{background:var(--orange);}
+.cardsall{display:block;width:100%;min-height:46px;margin:10px 0 4px;background:#fff;
+  border:1.5px solid var(--navy);border-radius:10px;color:var(--navy);
+  font-size:13.5px;font-weight:800;letter-spacing:.3px;cursor:pointer;}
 </style>
 
 <div class="wrap">
@@ -930,6 +1020,8 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   <button class="b-pdf" onclick="openRecord()">Preview / PDF</button>
   <button class="b-sub" id="subBtn" onclick="submitDay()">✓ Submit</button>
 </div>
+<div id="surewrap"><div class="surebox" id="surebody"></div></div>
+
 <div id="recwrap">
   <div id="recbar">
     <button type="button" class="r-close" onclick="closeRecord()">← Back</button>
@@ -1061,7 +1153,7 @@ function leadersToday(){
   add(byNow());
   return seen;
 }
-let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{}};
+let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{},cash:{}};
 
 /* Engagement types — P2I on the floor, internal and external */
 /* 'presence' is the leader showing up. 'selling' is what the consultant ran
@@ -1267,6 +1359,7 @@ function render(){
     host.appendChild(coach);
     host.appendChild(buildEngagement());
   }
+  host.appendChild(buildCash());
   if(S.shift==='OPENING') host.appendChild(buildOpeningMetrics());
   if(S.shift==='CLOSING') host.appendChild(buildEOD());
   host.appendChild(buildImpact());
@@ -1726,6 +1819,189 @@ function toGoalLine(scope){
     '<span class="soft">'+fmtMoney(r)+' against '+fmtMoney(g)+'</span>';
 }
 /* Opening shift — where the store stands at handoff */
+/* ═══════ CASH DRAWER COUNT ════════════════════════════════════════════
+   Replaces the sheet that gets printed twice a day, counted on, initialled
+   and filed. Same rows and the same arithmetic as that form, with the counts
+   typed rather than the dollar amounts, because a tablet can do the times
+   table and a tired closer at 9pm should not have to.
+
+   The over/short line is the whole point of the form, so nothing on this
+   screen is allowed to guess at it. Every number in it is either counted on
+   this shift, carried from the opener with their name on it, or typed. Where
+   the morning count cannot be found, it says so and asks, rather than
+   treating a missing number as a zero.
+   ──────────────────────────────────────────────────────────────────────── */
+const DENOMS=[
+  ['pennies','Pennies',0.01],['nickels','Nickels',0.05],['dimes','Dimes',0.10],
+  ['quarters','Quarters',0.25],['halves','Half dollars',0.50],
+  ['ones','$1',1],['fives','$5',5],['tens','$10',10],
+  ['twenties','$20',20],['fifties','$50',50],['hundreds','$100',100]
+];
+function cashInit(){
+  S.cash=S.cash||{};
+  const c=S.cash;
+  c.drawer=c.drawer||'';
+  ['am','pm'].forEach(function(k){
+    c[k]=c[k]||{}; c[k].n=c[k].n||{};
+    if(c[k].other==null) c[k].other='';
+    if(c[k].note==null) c[k].note='';
+    if(c[k].by==null) c[k].by='';
+    if(c[k].ver==null) c[k].ver='';
+  });
+  c.drops=c.drops||[{amt:'',mgr:'',emp:''},{amt:'',mgr:'',emp:''}];
+  if(c.log==null) c.log='';
+  if(c.amTyped==null) c.amTyped='';
+}
+function money(n){
+  const v=(typeof n==='number'&&isFinite(n))?n:0;
+  return (v<0?'-$':'$')+Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+function cashSide(k){ cashInit(); return S.cash[k]; }
+/* The denominations, plus whatever the Other line holds. */
+function cashCounted(k){
+  const s=cashSide(k); let t=0;
+  DENOMS.forEach(function(d){ const q=parseInt(s.n[d[0]],10); if(isFinite(q)) t+=q*d[2]; });
+  const o=parseFloat(String(s.other).replace(/[^0-9.-]/g,''));
+  if(isFinite(o)) t+=o;
+  return t;
+}
+/* Has anybody actually counted this side, or is it just zeros on a screen? */
+function cashTouched(k){
+  const s=cashSide(k);
+  if(DENOMS.some(function(d){ return String(s.n[d[0]]||'').trim()!==''; })) return true;
+  return String(s.other||'').trim()!=='';
+}
+/* The morning total the close reconciles against. Carried from the opener on
+   this tablet when it is there, typed when it is not, and never assumed. */
+function cashMorning(){
+  cashInit();
+  if(cashTouched('am')) return {v:cashCounted('am'), src:'counted', by:(S.cash.am.by||'').trim()};
+  const t=parseFloat(String(S.cash.amTyped).replace(/[^0-9.-]/g,''));
+  if(isFinite(t)&&String(S.cash.amTyped).trim()!=='') return {v:t, src:'typed', by:''};
+  return null;
+}
+function dropTotal(){
+  cashInit();
+  return S.cash.drops.reduce(function(t,d){
+    const v=parseFloat(String(d.amt).replace(/[^0-9.-]/g,''));
+    return t+(isFinite(v)?v:0); },0);
+}
+function cashLog(){
+  cashInit();
+  const v=parseFloat(String(S.cash.log).replace(/[^0-9.-]/g,''));
+  return (isFinite(v)&&String(S.cash.log).trim()!=='')?v:null;
+}
+/* The close, exactly as the form does it:
+   night count, less the morning count, plus the drops, is cash taken in.
+   Cash taken in, less what the log sheet says, is over or short. */
+function cashRecon(){
+  const am=cashMorning(), log=cashLog();
+  const pm=cashCounted('pm'), drops=dropTotal();
+  const takenIn=(am==null)?null:(pm-am.v+drops);
+  const over=(takenIn==null||log==null)?null:(takenIn-log);
+  return {pm:pm, am:am, drops:drops, takenIn:takenIn, log:log, over:over,
+          counted:cashTouched('pm')};
+}
+function denomRows(k){
+  const s=cashSide(k);
+  return '<div class="dgrid">'+DENOMS.map(function(d){
+    const q=String(s.n[d[0]]==null?'':s.n[d[0]]);
+    const n=parseInt(q,10);
+    const amt=isFinite(n)?money(n*d[2]):'';
+    return '<div class="drow">'+
+      '<label for="cq-'+k+'-'+d[0]+'">'+esc(d[1])+'</label>'+
+      '<input id="cq-'+k+'-'+d[0]+'" inputmode="numeric" pattern="[0-9]*" placeholder="0" '+
+        'data-cq="'+k+'" data-d="'+d[0]+'" value="'+escA(q)+'">'+
+      '<b>'+amt+'</b></div>';
+  }).join('')+
+  '<div class="drow other">'+
+    '<label for="co-'+k+'">Other</label>'+
+    '<input id="co-'+k+'" inputmode="decimal" placeholder="$0.00" data-co="'+k+'" value="'+escA(s.other)+'">'+
+    '<b></b></div>'+
+  '<input class="onote" type="text" placeholder="What the Other line is" data-cn="'+k+'" value="'+escA(s.note)+'">'+
+  '</div>'+
+  '<div class="ctot"><span>Total cash</span><b>'+money(cashCounted(k))+'</b></div>'+
+  '<div class="cwho">'+
+    '<div class="cf"><label for="cby-'+k+'">Counted by</label>'+
+      '<input id="cby-'+k+'" type="text" placeholder="CSR assigned to the drawer" data-cby="'+k+'" value="'+escA(s.by)+'"></div>'+
+    '<div class="cf"><label for="cvr-'+k+'">Verified by</label>'+
+      '<input id="cvr-'+k+'" type="text" placeholder="Who verified the count" data-cvr="'+k+'" value="'+escA(s.ver)+'"></div>'+
+  '</div>';
+}
+function dropRows(){
+  cashInit();
+  return '<div class="sub2">Drop verification<em>manager and employee both initial</em></div>'+
+    S.cash.drops.map(function(d,i){
+      return '<div class="droprow">'+
+        '<span>Drop #'+(i+1)+'</span>'+
+        '<input inputmode="decimal" placeholder="$0.00" data-dr="'+i+'" data-f="amt" value="'+escA(d.amt)+'">'+
+        '<input type="text" placeholder="MGR" maxlength="4" data-dr="'+i+'" data-f="mgr" value="'+escA(d.mgr)+'">'+
+        '<input type="text" placeholder="EMP" maxlength="4" data-dr="'+i+'" data-f="emp" value="'+escA(d.emp)+'">'+
+      '</div>'; }).join('');
+}
+function buildCash(){
+  cashInit();
+  const closing=(S.shift==='CLOSING');
+  const key=S.shift+'-cash';
+  const shut=(S.ui[key]==='shut');
+  const box=el('div','grp cash'+(shut?' shut':'')+(cashDone()?'':' needs'));
+  const side=closing?'pm':'am';
+  const done=cashTouched(side);
+  /* Folded, this line has to say whether the drawer is finished, not just
+     whether somebody typed in it. On the closer that means the over/short. */
+  let sum;
+  if(!done) sum='not counted';
+  else if(!closing) sum=money(cashCounted(side));
+  else {
+    const r=cashRecon();
+    sum=(r.over==null)?(money(r.pm)+' · not balanced')
+       :(Math.abs(r.over)<0.005?(money(r.pm)+' · balanced')
+                               :(money(r.pm)+' · '+money(r.over)));
+  }
+  box.appendChild(el('h2','','CASH DRAWER · '+(closing?'NIGHT COUNT':'MORNING COUNT')+
+    '<span>Element 5 · Back Office Controls<em data-tog="'+key+'">'+
+    sum+' '+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const body=el('div','gbody'), pad=el('div','numpad');
+  let h='<div class="cf wide"><label for="cdrawer">Cash drawer #</label>'+
+    '<input id="cdrawer" type="text" placeholder="Drawer number" data-cdraw="1" value="'+escA(S.cash.drawer)+'"></div>'+
+    '<p class="admnote">Type how many of each, not the dollars. The amounts and every total work themselves out.</p>'+
+    denomRows(side);
+
+  if(!closing){
+    h+=dropRows()+
+      '<p class="admnote">Log a drop here when it happens. The closer sees it tonight and it carries into the over and short.</p>';
+  } else {
+    const r=cashRecon();
+    h+='<div class="sub2">The close<em>night count against the day</em></div><div class="recon">';
+    h+='<div class="rr"><span>Total cash counted</span><b>'+money(r.pm)+'</b></div>';
+    if(r.am){
+      h+='<div class="rr"><span>Less morning count'+
+         (r.am.src==='counted'?'<em>counted this morning'+(r.am.by?' by '+esc(r.am.by):'')+'</em>':'<em>typed in</em>')+
+         '</span><b>− '+money(r.am.v)+'</b></div>';
+    } else {
+      h+='<div class="rr miss"><span>Less morning count<em>no morning count on this tablet</em></span>'+
+         '<input inputmode="decimal" placeholder="$0.00" data-amtyped="1" value="'+escA(S.cash.amTyped)+'"></div>';
+    }
+    h+=dropRows();
+    h+='<div class="rr"><span>Plus drops</span><b>+ '+money(r.drops)+'</b></div>';
+    h+='<div class="rr sum"><span>Cash taken in</span><b>'+(r.takenIn==null?'—':money(r.takenIn))+'</b></div>';
+    h+='<div class="rr"><span>Less cash on the log sheet</span>'+
+       '<input inputmode="decimal" placeholder="$0.00" data-clog="1" value="'+escA(S.cash.log)+'"></div>';
+    if(r.over==null){
+      h+='<div class="rr over wait"><span>Over / (short)</span><b>—</b></div>'+
+         '<p class="admnote">'+(r.am==null?'Needs the morning count.':'Needs the cash on the log sheet.')+'</p>';
+    } else {
+      const ok=Math.abs(r.over)<0.005;
+      h+='<div class="rr over '+(ok?'good':'bad')+'"><span>Over / (short)</span><b>'+money(r.over)+'</b></div>'+
+         '<p class="admnote'+(ok?'':' bad')+'">'+(ok?'Balanced.':'Should be zero. Recount before you close it out.')+'</p>';
+    }
+    h+='</div>';
+  }
+  pad.innerHTML=h;
+  body.appendChild(pad); box.appendChild(body);
+  return box;
+}
+
 function buildOpeningMetrics(){
   const box=el('div','grp eod');
   box.appendChild(el('h2','','SHIFT SALES METRICS — AT HANDOFF<span>Where the store stands when you leave</span>'));
@@ -1952,6 +2228,12 @@ function totals(){
     if(g.attest){ total++; if(S.items[itemId(gi,'a')])done++; return; }
     g.items.forEach((_,ii)=>{total++;if(S.items[itemId(gi,ii)])done++;}); });
   activeAors().forEach(x=>{total++;if((S.aor[aorKey(x.ai)]||{}).status)done++;});
+  /* Who is working today. Required, because every consultant card, every
+     coaching touch and the whole scoreboard hang off it, and five pilot
+     shifts came back with nobody checked in. Only counted where the store
+     actually has consultants loaded: a store with an empty list cannot
+     check anybody in and must not be held short for it. */
+  if(crewRows().length){ total++; if(crewOnToday().length)done++; }
   total++; if(S.eng.length)done++;                                  // engagement log — at least one
   total++; if((S.impact[todaysImpact().k]||'').trim())done++;      // today's impact prompt
   total++; if((S.reflect||'').trim())done++;                        // day reflection
@@ -1960,7 +2242,24 @@ function totals(){
     if(core.every(k=>metFilled(S.openm[k])))done++; }
   if(S.shift==='CLOSING'){ total++;                                 // EOD sales metrics count as one
     if(core.every(k=>metFilled(S.eod[k])))done++; }
+  total++; if(cashDone())done++;                                    // the drawer, counted and balanced
   return {done,total};
+}
+/* ── THE DRAWER COUNTS ─────────────────────────────────────────────────
+   Cash is a control document, not a nice-to-have, so it counts toward the
+   shift the same as a locked back door. Done means the count on the opener,
+   and on the closer the count plus an over/short that actually resolved,
+   because a night count with nothing to reconcile against is half the form.
+
+   Every number it needs is on the same screen (the morning total carries,
+   and there is a field to type it when it does not), and a shift can always
+   be filed short, so this can hold nobody hostage the way 26/27 did. */
+function cashDone(){
+  if(S.shift==='CLOSING'){
+    const r=cashRecon();
+    return !!(r.counted && r.over!=null);
+  }
+  return cashTouched('am');
 }
 /* The collapsed line has to say enough that a leader never needs to open it
    to check they are on the right store and the right shift. */
@@ -1986,11 +2285,17 @@ function updateProg(){
   document.getElementById('progbar').style.width=total?(done/total*100)+'%':'0';
   const b=document.getElementById('subBtn');
   const ready=S.shift&&total>0&&done===total;
-  if(typeof SYNC!=='undefined'&&SYNC.submitted&&!SYNC.dirty){ b.disabled=true; b.textContent='✓ Submitted'; }
-  else if(typeof SYNC!=='undefined'&&SYNC.submitted){ b.disabled=!ready;
-    b.textContent=ready?'✓ Submit update':`✓ Submit update (${total-done} left)`; }
-  else { b.disabled=!ready;
-    b.textContent=ready?'✓ Submit':(S.shift?`✓ Submit (${total-done} left)`:'✓ Submit'); }
+  const short=S.shift&&total>0&&done<total;
+  const upd=(typeof SYNC!=='undefined'&&SYNC.submitted);
+  b.classList.toggle('short',!!short);
+  if(upd&&!SYNC.dirty){ b.disabled=true; b.classList.remove('short'); b.textContent='✓ Submitted'; }
+  else {
+    /* Never disabled for being unfinished. A shift that cannot be filed is a
+       shift nobody upstream ever sees. */
+    b.disabled=!S.shift;
+    const stem=upd?'✓ Submit update':'✓ Submit';
+    b.textContent=short?(stem+' \u00b7 '+(total-done)+' short'):stem;
+  }
   if(typeof syncLabel==='function') syncLabel();
 }
 
@@ -3019,7 +3324,27 @@ function rosterSlot(){
   if(DATA.crew&&DATA.crew.rows&&DATA.crew.rows.length) return 'crew';
   return have[have.length-1][0];
 }
+/* The store's consultants, plus anybody who is on today's published schedule
+   or was added by hand and is not in the reports. A loaner from another store
+   has no numbers here and must still be checkable in and coachable, so they
+   arrive with the same blank-metric shape a period gap already produces. */
 function crewRows(){
+  return crewReport().concat(crewExtras());
+}
+function crewExtras(){
+  const have={}; crewReport().forEach(function(r){ have[nk(r.name)]=1; });
+  const out=[], seen={};
+  const push=function(n,flag){
+    const nm=String(n||'').trim(); if(!nm) return;
+    if(have[nk(nm)]||seen[nk(nm)]) return;
+    seen[nk(nm)]=1;
+    out.push(Object.assign({name:nm, store:myStore()||''}, blankMetrics(), flag));
+  };
+  schedToday().forEach(function(r){ push(r.name,{_sched:1}); });
+  Object.keys(S.crewadd||{}).forEach(function(n){ push(n,{_added:1}); });
+  return out;
+}
+function crewReport(){
   const base=crewRowsFor(rosterSlot()), slot=curPeriod();
   if(slot===rosterSlot()) return base;
   const src=crewRowsFor(slot), by={};
@@ -3870,14 +4195,26 @@ function coachRender(){
     '<div><b>Internal P2I</b><span>'+esc(COACH.who||'Coaching touch')+' · '+esc(when)+'</span></div>'+
     '</div><div class="cbody">';
 
-  /* Logged from the pinned bar there is no name on it yet. One tap fixes
-     that, and an unattributed touch still counts. */
-  if(!COACH.who&&roster.length){
-    h+='<div class="sub3">Who did you coach?</div><div class="cchips">';
-    roster.forEach(function(c){
-      h+='<button type="button" class="cchip" data-cwho="'+escA(c.name)+'">'+esc(c.name)+'</button>';
-    });
-    h+='</div>';
+  /* Logged from the pinned bar there is no name on it yet, and this is where
+     it gets one. The chips used to come only from today's roster, so a leader
+     who had not checked anybody in got no Who section at all: they picked a
+     topic, saved, and the coaching went into the record against nobody. Five
+     pilot shifts came back that way, every touch attributed to a dash.
+     So when the roster is empty the whole store is offered, and picking
+     somebody here checks them in for the day as well. */
+  if(!COACH.who){
+    const pick=roster.length?roster:crewRows();
+    if(pick.length){
+      h+='<div class="sub3">Who did you coach?'+
+         (roster.length?'':'<em>picking adds them to today\u2019s roster</em>')+'</div><div class="cchips">';
+      pick.forEach(function(c){
+        h+='<button type="button" class="cchip" data-cwho="'+escA(c.name)+'">'+esc(c.name)+'</button>';
+      });
+      h+='</div>';
+    } else {
+      h+='<div class="sub3">Who did you coach?</div>'+
+         '<p class="admnote">No consultants are loaded for this store, so this one goes in without a name.</p>';
+    }
   }
 
   h+='<div class="sub3">What did you coach?</div><div class="cchips">';
@@ -3902,6 +4239,12 @@ function coachRender(){
 }
 /* Both buttons log the P2I. The difference is whether it carries a topic. */
 function coachCommit(withDetail){
+  /* An internal P2I is coaching with a person. Without the name it is a tally
+     nobody can act on, so it is refused while there is anybody to pick. */
+  if(!COACH.who && crewRows().length){
+    toast('Pick who you coached first.');
+    return;
+  }
   const note=(function(){ const e=document.getElementById('coachnote'); return e?e.value:COACH.note; })();
   const when=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   const e={t:'assoc',at:when,who:COACH.who||'',by:byNow()};
@@ -3949,18 +4292,10 @@ function periodBar(){
     : '';
   return bar+note;
 }
-function buildCheckin(crew){
-  const n=crewOnToday().length;
-  let h='<div class="chiprow">';
-  crew.forEach(function(c){
-    const on=!!S.crewin[c.name];
-    h+='<button type="button" class="chip'+(on?' on':'')+'" data-crewin="'+escA(c.name)+'">'+
-       esc(c.name)+'</button>';
-  });
-  h+='<button type="button" class="chip all" data-crewall="1">'+
-     (n===crew.length?'Clear all':'Everyone in')+'</button></div>';
-  if(!n) h+='<p class="admnote" style="margin-top:9px">Tap the consultants working today. Their scorecards and the conversation to have follow.</p>';
-  h=periodBar()+h;
+/* Where the consultant list came from and who it could not place. Pulled out
+   of the chip builder so the schedule rewrite below did not have to carry it. */
+function checkinNotes(){
+  let h='';
   /* The consultant report carries no store column, so say plainly where the
      store came from and who it could not place. A short list is better read
      as incomplete than as the whole floor. */
@@ -3977,6 +4312,238 @@ function buildCheckin(crew){
     soft.map(function(x){ return esc(x[0])+' as <b>'+esc(x[1])+'</b>'; }).join(', ')+'.</p>';
   return h;
 }
+/* ═══════ TODAY'S SCHEDULE, PUBLISHED BY THE SMART SCHEDULER ═══════════
+   The roster was the leader's job twice over: remember who is working, then
+   tap them all in. One of those is already written down somewhere else. The
+   Smart Scheduler knows who is on today for all 41 stores, so the Scoreboard
+   reads it rather than asking a leader to retype it at 9am.
+
+   What the leader still does is confirm it, in one tap, because a schedule is
+   a plan and a shift is what happened. Two people call out, somebody comes in
+   on their day off, and a prefill nobody looked at would have the app coaching
+   names that were not in the building. So the schedule fills the roster in and
+   the leader says yes, and every difference between the two is logged with a
+   time on it.
+
+   The contract is one document per store in its own collection, exactly the
+   shape sbdata already uses, so the read, the rules and the failure handling
+   are all the ones that are already proven:
+
+     sbsched/{storeCode}
+       day    the ISO day this was published for
+       built  when
+       by     who published it
+       json   {"days":{"2026-10-04":[{name,role,start,end}, ...], ...}}
+
+   No schedule for this store, or none for today, and the roster behaves
+   exactly as it does now: the whole consultant list, tap who is in. Nothing
+   here can leave a store unable to finish a shift.
+   ──────────────────────────────────────────────────────────────────────── */
+const SCH_COL='sbsched';
+const SCHK='1915_leader_sched';
+var SCHED=null;
+var SCHLOAD={state:'', code:'', msg:''};
+
+function schedLoad(){ try{ SCHED=JSON.parse(localStorage.getItem(SCHK)||'null'); }catch(e){ SCHED=null; } }
+function schedSave(){ try{ localStorage.setItem(SCHK,JSON.stringify(SCHED)); }catch(e){} }
+
+/* Only ever today. A week's worth arrives in one document, and reading the
+   wrong day off it would be worse than having no schedule at all. */
+function schedToday(){
+  if(!SCHED||!SCHED.days) return [];
+  const rows=SCHED.days[isoDate()];
+  if(!Array.isArray(rows)) return [];
+  return rows.filter(function(r){ return r&&String(r.name||'').trim(); });
+}
+function schedOn(){ return schedToday().length>0; }
+function schedRow(name){
+  const k=nk(name);
+  return schedToday().filter(function(r){ return nk(r.name)===k; })[0]||null;
+}
+function schedIs(name){ return !!schedRow(name); }
+/* "9:30 to 7", the way a leader says it, not 09:30:00. */
+function schedHours(name){
+  const r=schedRow(name); if(!r) return '';
+  const t=function(v){
+    const m=String(v||'').match(/^(\d{1,2}):?(\d{2})?/); if(!m) return '';
+    let h=parseInt(m[1],10); const mi=m[2]||'00';
+    if(!isFinite(h)) return '';
+    if(h>12) h-=12;
+    return h+(mi==='00'?'':':'+mi);
+  };
+  const a=t(r.start), b=t(r.end);
+  return (a&&b)?(a+'-'+b):(a||b||'');
+}
+
+/* ── The read ──────────────────────────────────────────────────────────── */
+async function fbGetSched(code){
+  const tok=await fbToken();
+  const res=await fetch(fbDocs()+'/'+SCH_COL+'/'+code,{headers:{'Authorization':'Bearer '+tok}});
+  if(res.status===404) return null;                 /* nothing published yet */
+  if(res.status===403) return null;                 /* not allowed is the same as not there */
+  if(!res.ok) throw new Error('Firestore '+res.status);
+  const j=await res.json(); const f=j.fields||{};
+  const raw=fbRead(f.json); if(!raw) return null;
+  let pack; try{ pack=JSON.parse(raw); }catch(e){ throw new Error('The schedule for this store is unreadable.'); }
+  return {day:fbRead(f.day)||'', built:fbRead(f.built)||'', by:fbRead(f.by)||'',
+          days:pack.days||{}};
+}
+let SCH_BUSY=false;
+async function schedPull(force){
+  if(isStoreCopy()||!FB_ON) return;
+  if(!signedIn()) return;
+  const code=sbMyCode(); if(!code) return;
+  if(!force && SCHLOAD.state==='ok' && SCHLOAD.code===code) return;
+  if(SCH_BUSY) return;
+  SCH_BUSY=true;
+  SCHLOAD={state:'loading',code:code,msg:''};
+  try{
+    const got=await fbGetSched(code);
+    SCHED=got; schedSave();
+    SCHLOAD={state:got?'ok':'none',code:code,msg:''};
+    render();
+  }catch(e){
+    /* A schedule that will not load is a schedule the leader fills in by hand,
+       which is the behaviour they have today. It is never an error that stops
+       the shift. */
+    SCHLOAD={state:'err',code:code,msg:String(e.message||e).slice(0,90)};
+  }
+  SCH_BUSY=false;
+}
+
+/* ── The roster log ────────────────────────────────────────────────────── */
+/* Everything that moves between the plan and the floor, with a time on it and
+   the leader who did it. This is what makes scheduled-against-worked a real
+   number upstream instead of a guess. */
+/* The timestamps on the log are stored as epoch and printed as a clock time,
+   so a record stays readable without carrying a date format around. */
+function hm2(ms){
+  const d=new Date(ms||0);
+  if(!isFinite(d.getTime())) return '';
+  return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+}
+function rosterLog(kind,who,why){
+  S.rosterlog=Array.isArray(S.rosterlog)?S.rosterlog:[];
+  S.rosterlog.push({t:kind, who:String(who||''), why:why||'',
+                    at:Date.now(), by:(S.header.leader||'').trim()});
+  if(S.rosterlog.length>400) S.rosterlog=S.rosterlog.slice(-400);
+}
+const OUT_WHY=['Called out','Running late','Sent home','PTO','Swapped off','Not scheduled after all'];
+
+/* Who was scheduled, who worked, and every difference. Printed on the record
+   and carried in the summary the Field Leader App reads. */
+function rosterDiff(){
+  const sched=schedToday().map(function(r){ return String(r.name).trim(); });
+  const on=crewOnToday().map(function(c){ return c.name; });
+  const onk={}; on.forEach(function(n){ onk[nk(n)]=1; });
+  const schk={}; sched.forEach(function(n){ schk[nk(n)]=1; });
+  const out=[]; Object.keys(S.crewout||{}).forEach(function(n){
+    if(!onk[nk(n)]) out.push({who:n, why:S.crewout[n]||''}); });
+  const added=on.filter(function(n){ return !schk[nk(n)]; });
+  const silent=sched.filter(function(n){
+    return !onk[nk(n)] && !out.some(function(o){ return nk(o.who)===nk(n); }); });
+  return {scheduled:sched, worked:on, out:out, added:added, unaccounted:silent,
+          published:!!(SCHED&&SCHED.built), by:(SCHED&&SCHED.by)||''};
+}
+
+/* ── The chips ─────────────────────────────────────────────────────────── */
+/* With a published schedule this is a confirmation, not data entry: the
+   people who are supposed to be here are already on screen, greyed until
+   somebody says they turned up. "Everyone here" is the one tap that is meant
+   to carry a normal day. Without a schedule it is the list the leader has
+   always had, unchanged. */
+function buildCheckin(crew){
+  const on=crewOnToday().length;
+  const sched=schedOn();
+  let h='';
+  if(sched){
+    const plan=schedToday().length;
+    const allIn=crew.filter(function(c){ return schedIs(c.name)&&S.crewin[c.name]; }).length===plan;
+    h+='<div class="schhead"><b>Scheduled today</b><span>'+plan+' on the schedule'+
+       ((SCHED&&SCHED.by)?', published by '+esc(SCHED.by):'')+'</span></div>';
+    h+='<div class="chiprow">';
+    /* schedule order first, so the chips read like the schedule does */
+    const seen={};
+    schedToday().forEach(function(r){
+      const row=crew.filter(function(c){ return nk(c.name)===nk(r.name); })[0];
+      const nm=row?row.name:String(r.name).trim();
+      seen[nk(nm)]=1;
+      h+=chipFor(nm,true);
+    });
+    const rest=crew.filter(function(c){ return !seen[nk(c.name)]; });
+    h+='<button type="button" class="chip all" data-crewall="1">'+
+       (allIn?'Clear all':'✓ Everyone here')+'</button>';
+    h+='<button type="button" class="chip add" data-crewadd="open">+ Someone came in</button>';
+    h+='</div>';
+    /* The rest of the store is still one tap away, but under its own heading,
+       so a leader reading down the chips is never unsure which list is which. */
+    if(rest.length){
+      h+='<div class="schhead off"><b>Not scheduled today</b>'+
+         '<span>tap anyone who came in anyway</span></div><div class="chiprow">'+
+         rest.map(function(c){ return chipFor(c.name,false); }).join('')+'</div>';
+    }
+    if(S.ui.crewout) h+=outWhyRow(S.ui.crewout);
+    if(S.ui.crewadd==='open') h+=addRow(crew);
+    const d=rosterDiff();
+    if(d.out.length) h+='<p class="admnote" style="margin-top:7px">Not in today: '+
+      d.out.map(function(o){ return '<b>'+esc(o.who)+'</b>'+(o.why?' ('+esc(o.why)+')':''); }).join(', ')+
+      '. That goes on the record.</p>';
+    if(!on) h+='<p class="admnote" style="margin-top:9px">Tap <b>Everyone here</b> if the schedule held, '+
+      'or tap the ones who turned up. Anybody who did not will ask you why, once.</p>';
+  } else {
+    h+='<div class="chiprow">';
+    crew.forEach(function(c){ h+=chipFor(c.name,false); });
+    h+='<button type="button" class="chip all" data-crewall="1">'+
+       (on===crew.length?'Clear all':'Everyone in')+'</button>';
+    h+='<button type="button" class="chip add" data-crewadd="open">+ Someone came in</button>';
+    h+='</div>';
+    if(S.ui.crewadd==='open') h+=addRow(crew);
+    if(!on) h+='<p class="admnote" style="margin-top:9px">Tap the consultants working today. '+
+      'Their scorecards and the conversation to have follow.</p>';
+    if(SCHLOAD.state==='err') h+='<p class="admnote" style="margin-top:7px">'+
+      'Could not read the published schedule, so this is by hand today. '+esc(SCHLOAD.msg)+'</p>';
+    else if(SCHLOAD.state==='none'||SCHLOAD.state==='ok') h+='<p class="admnote" style="margin-top:7px">'+
+      'No schedule published for this store today, so this is by hand.</p>';
+  }
+  h=periodBar()+h;
+  return h+checkinNotes();
+}
+function chipFor(name,isSched){
+  const on=!!S.crewin[name];
+  const why=(S.crewout||{})[name];
+  const out=(!on&&why);
+  const hrs=isSched?schedHours(name):'';
+  let cls='chip'+(on?' on':'')+(out?' out':'')+(isSched&&!on&&!out?' sch':'')+(!isSched&&!on?' extra':'');
+  return '<button type="button" class="'+cls+'" data-crewin="'+escA(name)+'">'+esc(name)+
+    (hrs?'<em>'+esc(hrs)+'</em>':'')+(out?'<em>'+esc(why)+'</em>':'')+'</button>';
+}
+/* Asked once, answered with a tap. A picker and not a text box on purpose:
+   why somebody is not at work can stray into things that have no business on
+   an operational record that gets read upstream. */
+function outWhyRow(name){
+  return '<div class="whyrow"><div class="sub2">'+esc(name)+' is not in<em>one tap, or skip it</em></div>'+
+    '<div class="chiprow">'+
+      OUT_WHY.map(function(w){
+        return '<button type="button" class="chip why" data-crewwhy="'+escA(w)+'">'+esc(w)+'</button>'; }).join('')+
+      '<button type="button" class="chip skip" data-crewwhy="">Skip</button>'+
+    '</div></div>';
+}
+/* Somebody who was not on the schedule. The store's own people first, because
+   that is almost always who it is, then a name typed in for a loaner. */
+function addRow(crew){
+  const off=crew.filter(function(c){ return !S.crewin[c.name]; });
+  return '<div class="addrow"><div class="sub2">Who else came in<em>not on today’s schedule</em></div>'+
+    '<div class="chiprow">'+
+      off.map(function(c){
+        return '<button type="button" class="chip" data-crewnew="'+escA(c.name)+'">'+esc(c.name)+'</button>'; }).join('')+
+    '</div>'+
+    '<div class="cf wide"><label for="crewother">Somebody from another store</label>'+
+      '<input id="crewother" type="text" placeholder="Their name" data-crewother="1" '+
+      'value="'+escA(S.ui.crewothertxt||'')+'">'+
+      '<button type="button" class="sb-go" data-crewothergo="1">Add them</button></div>'+
+    '<button type="button" class="chip skip" data-crewadd="">Done</button></div>';
+}
+
 
 /* Consultant standards, as stated. A metric the file did not carry is left
    out, never filled in. */
@@ -4217,6 +4784,17 @@ function behGroup(g){
     return t&&t.g===g;
   });
 }
+/* Open them all to read the floor, shut them all to work it. With eight
+   consultants checked in the list is long, and a leader on a phone should not
+   have to fold eight cards one at a time to get back to the bottom. */
+function cardsToggle(){
+  const on=crewOnToday();
+  if(on.length<2) return '';
+  const openN=on.filter(function(c){ return S.ui['card-'+flyKey(c.name)]==='open'; }).length;
+  const allOpen=(openN>=on.length);
+  return '<button type="button" class="cardsall" data-cardsall="'+(allOpen?'shut':'open')+'">'+
+    (allOpen?'Close all '+on.length:'Open all '+on.length)+'</button>';
+}
 function buildPeople(crew,lever){
   const on=crewOnToday();
   if(!on.length) return '';
@@ -4369,8 +4947,14 @@ function buildRoster(){
   if(S.ui[key]==null) S.ui[key]='open';
   const shut=(S.ui[key]==='shut');
   const box=el('div','grp roster'+(shut?' shut':''));
-  box.appendChild(el('h2','','DAILY ROSTER<span>Drop in who is working<em data-tog="'+key+'">'+
-    (on.length?on.length+' in ':'')+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const needs=crew.length&&!on.length;
+  const plan=schedOn()?schedToday().length:0;
+  const sub=plan?(needs?'Confirm who is in':'Confirmed against the schedule')
+                :(needs?'Check in who is working':'Drop in who is working');
+  const tag=plan?(on.length+' of '+plan+' in '):(on.length?on.length+' in ':needs?'none in ':'');
+  box.appendChild(el('h2','','DAILY ROSTER<span>'+sub+
+    '<em data-tog="'+key+'">'+tag+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  if(needs) box.classList.add('needs');
   const body=el('div','gbody'), pad=el('div','numpad');
   pad.innerHTML='<p class="creed">Get the list done so it frees you up to connect and coach. '+
     'Be involved all day, because coaching never stops. Then inspect what you expect. '+
@@ -4379,6 +4963,7 @@ function buildRoster(){
     buildCheckin(crew)+
     oneDueLine(crew)+
     '<a class="scbtn" href="'+SCORECARD_URL+'" target="_blank" rel="noopener">Open Scorecards to coach &#8599;</a>'+
+    cardsToggle()+
     buildPeople(crew,lever);
   body.appendChild(pad);
   box.appendChild(body);
@@ -4487,6 +5072,8 @@ function leftItems(){
     const k=aorKey(x.ai);
     if(!(S.aor[k]||{}).status) out.push({label:x.a.n, where:'AOR walk', aor:k});
   });
+  if(crewRows().length && !crewOnToday().length)
+    out.push({label:'Check in who is working today', where:'Daily roster', sel:'.chiprow'});
   if(!S.eng.length)
     out.push({label:'Log a touch on the floor', where:'Floor log', sel:'#eng-log'});
   const ik=todaysImpact().k;
@@ -4502,6 +5089,23 @@ function leftItems(){
     out.push({label:miss.map(function(c){ return c[1]; }).join(', ')+' still blank',
               where:(scope==='eod')?'End of day numbers':'Handoff numbers',
               sel:'#m-'+scope+'-'+miss[0][0]});
+  if(!cashDone()){
+    const side=(S.shift==='CLOSING')?'pm':'am';
+    const night=(side==='pm');
+    if(!cashTouched(side)){
+      out.push({label:'Count the cash drawer',
+                where:'Cash drawer · '+(night?'night count':'morning count'),
+                sel:'#cq-'+side+'-pennies'});
+    } else {
+      /* Counted, but it will not balance yet. Name the one number it is
+         waiting on rather than sending them back to recount. */
+      const r=cashRecon();
+      out.push({label:(r.am==null)?'Morning count, so the drawer can balance'
+                                  :'Cash on the log sheet',
+                where:'Cash drawer · over / short',
+                sel:(r.am==null)?'[data-amtyped]':'[data-clog]'});
+    }
+  }
   return out;
 }
 /* Takes you to it, whatever it is behind. The checklist may be folded into the
@@ -4906,6 +5510,28 @@ function publishCopy(){
 /* One tap replaces building a file and sending it to 41 stores. The button
    reports store by store, because a silent 30 second pause on a one-tap
    action is how somebody taps it four times. */
+async function ssLink(btn){
+  const em=(document.getElementById('ssmail')||{}).value||'';
+  const pw=(document.getElementById('sspw')||{}).value||'';
+  const kf=document.getElementById('sskey');
+  if(kf&&kf.value.trim()){ SSL.key=kf.value.trim(); sslSave(); }
+  if(!em.trim()||!pw){ toast('Both the address and the password.'); return; }
+  const was=btn.textContent; btn.disabled=true; btn.textContent='Linking…';
+  try{ await ssSignIn(em.trim(),pw); SSRUN={state:'',msg:'',rows:[]}; admRender(); toast('Smart Scheduler linked.'); }
+  catch(e){ SSRUN={state:'err',msg:String(e.message||e),rows:[]}; admRender(); }
+  btn.disabled=false; btn.textContent=was;
+}
+async function ssPullNow(btn){
+  if(!signedIn()){ toast('Sign in to this board first.'); signOpen('to write the schedules'); return; }
+  const was=btn.textContent; btn.disabled=true;
+  try{
+    await ssPush(function(){ btn.textContent=SSRUN.msg||'Working…'; admRender(); });
+    schedPull(true);                         /* and show it on this screen too */
+    toast(SSRUN.msg||'Schedules written.');
+  }catch(e){ SSRUN={state:'err',msg:String(e.message||e).slice(0,110),rows:[]}; admRender(); }
+  btn.disabled=false; btn.textContent=was;
+  admRender();
+}
 async function pushCloud(btn){
   const was=btn.textContent;
   if(!signedIn()){ toast('Sign in first, then push.'); signOpen('to push the numbers'); return; }
@@ -4920,6 +5546,12 @@ async function pushCloud(btn){
     if(r.failed.length)msg+=' \u00b7 FAILED: '+r.failed.join(', ');
     toast(msg);
     if(r.big.length||r.failed.length) console.warn('pushCloud',r);
+    /* The numbers are a daily job and the schedule is a weekly one, so this
+       button does not pull the schedule any more. It does say when the one on
+       file has run out, because a week nobody remembered to pull is the
+       failure that shows up as empty rosters on a Monday morning. */
+    if(SSL.refresh && !schedCovers()) toast('Numbers pushed. The schedule has run out, pull this week.');
+    admRender();
   }catch(e){ toast(e.message||'Could not push the numbers.'); }
   btn.disabled=false; btn.textContent=was;
 }
@@ -4996,11 +5628,77 @@ function admGuide(){
     '</div>';
   return h+'</div>';
 }
+/* Dates a person reads rather than an ISO string, because "through Sat 10/10"
+   answers the only question this card is asked. */
+function longDay(iso){
+  const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return String(iso||'');
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+
+         m[2].replace(/^0/,'')+'/'+m[3].replace(/^0/,'');
+}
+function longWhen(ms){
+  const d=new Date(ms||0); if(!isFinite(d.getTime())) return '';
+  const day=d.toISOString().slice(0,10);
+  return (day===localDay()?'today':longDay(day))+' at '+
+         d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+}
+/* The Smart Scheduler card. Only here, only in the master, and the key and the
+   sign-in never travel with a store copy or the public page. */
+function schedCard(){
+  const linked=!!(SSL.refresh&&SSL.email);
+  const r=SSRUN||{};
+  const due=linked&&!schedCovers();
+  let h='<div class="grp'+(due?' duepull':'')+'"><h2 style="cursor:default">Today’s roster, from the Smart Scheduler'+
+    '<span>'+(linked?(due?'needs this week’s pull':'linked as '+esc(SSL.email)):'not linked yet')+'</span></h2><div class="numpad">';
+  h+='<p class="admnote">The Scheduler sits on its own Firebase project, so it cannot write '+
+     'here by itself and this board cannot read there. This pulls the posted weeks across as '+
+     'you, who has an account in both, and writes one schedule per store. Leaders then open '+
+     'their board and the roster is already filled in.</p>';
+  if(!linked){
+    h+='<div class="cf wide"><label for="ssmail">Your Smart Scheduler sign-in</label>'+
+       '<input id="ssmail" type="email" autocomplete="username" placeholder="you@1915south.com" value="'+escA(SSL.email||(AUTH.email||''))+'"></div>'+
+       '<div class="cf wide"><label for="sspw">Password</label>'+
+       '<input id="sspw" type="password" autocomplete="current-password" placeholder="Your Smart Scheduler password"></div>'+
+       '<button type="button" class="filebtn" data-sslink="1">Link the Smart Scheduler</button>'+
+       '<p class="admnote" style="margin-top:10px">Kept on this machine, in this file’s own storage. '+
+       'It is never pushed to the cloud and never goes near a store copy.</p>';
+    if(!SSL.key) h+='<div class="cf wide"><label for="sskey">If linking says it needs the key</label>'+
+       '<input id="sskey" type="text" placeholder="apiKey from the Scheduler’s config.js" value=""></div>';
+  } else {
+    const live=schedCovers();
+    h+='<p class="admnote'+(live?'':' bad')+'"><b>'+
+       (live?('Schedules on file through '+esc(longDay(SSL.covers)))
+            :(SSL.covers?('Schedules ran out '+esc(longDay(SSL.covers))+'. Pull this week.')
+                        :'Nothing pulled yet.'))+'</b>'+
+       (SSL.pulled?('<br>Last pulled '+esc(longWhen(SSL.pulled))):'')+'</p>'+
+       '<p class="admnote">This is a weekly job. One pull carries the whole week, so '+
+       'Push to cloud leaves it alone. A shift that changes after this does not need '+
+       'another pull: the leader adds or drops the person on their own board, and that '+
+       'is what goes on the record anyway.</p>'+
+       '<button type="button" class="filebtn" data-sspull="1">'+
+       (live?'Pull again':'Pull this week’s schedules')+'</button>'+
+       '<button type="button" class="filebtn ghost" data-ssunlink="1">Unlink</button>';
+  }
+  if(r.state==='run') h+='<p class="admnote">'+esc(r.msg||'Working…')+'</p>';
+  if(r.state==='none') h+='<p class="admnote bad">'+esc(r.msg)+'</p>';
+  if(r.state==='err')  h+='<p class="admnote bad">'+esc(r.msg)+'</p>';
+  if(r.state==='done'){
+    const bad=(r.rows||[]).filter(function(x){ return !x.ok||!x.people; });
+    h+='<p class="admnote"><b>'+esc(r.msg)+'</b></p>';
+    if(bad.length) h+='<p class="admnote bad">Check these: '+
+      esc(bad.map(function(x){ return x.store+(x.err?' ('+x.err+')':' (nobody on it)'); }).join(', '))+'</p>';
+    if((r.missing||[]).length) h+='<p class="admnote">No live week posted for: '+
+      esc(r.missing.map(function(x){ return String(x).replace(/^\d+\s*—\s*/,''); }).join(', '))+'</p>';
+  }
+  h+='</div></div>';
+  return h;
+}
 function admRender(){
   document.getElementById('admbody').innerHTML=
     admGuide()+
     slotCard('store')+slotCard('goals')+slotCard('crew')+slotCard('crewWtd')+slotCard('crewDay')+
     slotCard('carts')+slotCard('roster')+slotCard('leaders')+
+    schedCard()+
     '<div class="grp"><h2 style="cursor:default">Send it to the stores<span>'+
       (DATA.store||DATA.crew||DATA.crewWtd||DATA.crewDay?'ready':'load a file first')+'</span></h2><div class="numpad">'+
       '<p class="admnote">Sends today\u2019s numbers to every store at once. Leaders open the '+
@@ -5109,7 +5807,7 @@ document.addEventListener('click',e=>{
     Object.keys(S.ui).forEach(function(k){ if(k.indexOf('aor-')===0) S.ui[k]=''; });
     S.ui['aor-'+t.dataset.aoropen]='open'; render(); save(); return; }
   if(t.dataset.onego){
-    const nm=t.dataset.onego, id=flyKey(nm), ck='p-'+id;
+    const nm=t.dataset.onego, id=flyKey(nm), ck='card-'+id;
     S.ui[ck]='open'; S.ui['one-'+id]='open';
     if(ninjaOn()) S.ui.ninja='off';
     if(S.ui[S.shift+'-roster']==='shut') S.ui[S.shift+'-roster']='';
@@ -5137,6 +5835,10 @@ document.addEventListener('click',e=>{
     return; }
   if(t.dataset.tog2){ const k=t.dataset.tog2;
     S.ui[k]=(S.ui[k]==='open')?'':'open'; render(); save(); return; }
+  if(t.dataset.cardsall){
+    const want=t.dataset.cardsall;
+    crewOnToday().forEach(function(c){ S.ui['card-'+flyKey(c.name)]=(want==='open')?'open':'shut'; });
+    render(); save(); return; }
   if(t.dataset.card){ const k=t.dataset.card;
     S.ui[k]=(S.ui[k]==='open')?'shut':'open'; render(); save(); return; }
   if(t.dataset.hdr){ S.ui.hdr=(S.ui.hdr==='open')?'':'open'; hdrSum(); save(); return; }
@@ -5148,15 +5850,50 @@ document.addEventListener('click',e=>{
   if(t.dataset.cper){ S.ui.cper=t.dataset.cper; render(); save(); return; }
   if(t.dataset.sper){ S.ui.sper=t.dataset.sper; render(); save(); return; }
   if(t.dataset.crewin){ const k=t.dataset.crewin;
-    if(S.crewin[k]) delete S.crewin[k]; else S.crewin[k]=1;
+    S.crewout=S.crewout||{};
+    if(S.crewin[k]){
+      /* checking somebody off who was supposed to be here is an exception, so
+         it gets asked about. Somebody who was never on the schedule is just
+         a correction and goes quietly. */
+      delete S.crewin[k]; rosterLog('out',k,'');
+      if(schedIs(k)) S.ui.crewout=k; else delete S.crewout[k];
+    } else {
+      S.crewin[k]=1; delete S.crewout[k];
+      if(S.ui.crewout===k) S.ui.crewout='';
+      rosterLog('in',k,'');
+    }
     render(); save(); return; }
+  if(t.dataset.crewwhy!=null){ const who=S.ui.crewout, why=t.dataset.crewwhy;
+    S.crewout=S.crewout||{};
+    if(who){ if(why){ S.crewout[who]=why; rosterLog('why',who,why); } else delete S.crewout[who]; }
+    S.ui.crewout=''; render(); save(); return; }
+  if(t.dataset.crewadd!=null){ S.ui.crewadd=t.dataset.crewadd||''; render(); save(); return; }
+  if(t.dataset.crewnew){ const k=t.dataset.crewnew;
+    S.crewin[k]=1; S.crewout=S.crewout||{}; delete S.crewout[k];
+    rosterLog('added',k,schedIs(k)?'':'not on the schedule');
+    S.ui.crewadd=''; render(); save(); return; }
+  if(t.dataset.crewothergo){
+    const nm=String(S.ui.crewothertxt||'').trim();
+    if(!nm){ toast('Type their name first.'); return; }
+    S.crewadd=S.crewadd||{}; S.crewadd[nm]=1; S.crewin[nm]=1;
+    rosterLog('added',nm,'from another store');
+    S.ui.crewothertxt=''; S.ui.crewadd=''; render(); save(); return; }
   if(t.dataset.crewall){ const all=crewRows();
-    const on=all.filter(c=>S.crewin[c.name]).length===all.length;
-    S.crewin={}; if(!on) all.forEach(c=>{S.crewin[c.name]=1;});
-    render(); save(); return; }
+    /* With a schedule up this is "everyone here", which means the people who
+       were scheduled, not every consultant on the payroll. */
+    const plan=schedOn()?all.filter(c=>schedIs(c.name)):all;
+    const on=plan.length&&plan.filter(c=>S.crewin[c.name]).length===plan.length;
+    S.crewout=S.crewout||{};
+    if(on){ plan.forEach(c=>{ delete S.crewin[c.name]; }); rosterLog('cleared','all',''); }
+    else { plan.forEach(c=>{ if(!S.crewin[c.name]){ S.crewin[c.name]=1; rosterLog('in',c.name,'as scheduled'); } delete S.crewout[c.name]; }); }
+    S.ui.crewout=''; render(); save(); return; }
   if(t.dataset.pick){ csvTarget=t.dataset.pick; document.getElementById('csvInput').click(); return; }
   if(t.dataset.admhelp){ S.ui.admhelp=(S.ui.admhelp==='open')?'':'open'; save(); admRender(); return; }
   if(t.dataset.publish){ publishCopy(); return; }
+  if(t.dataset.sslink){ ssLink(t); return; }
+  if(t.dataset.sspull){ ssPullNow(t); return; }
+  if(t.dataset.ssunlink){ SSL={key:SSL.key,email:'',token:'',refresh:'',exp:0};
+    SSRUN={state:'',msg:'',rows:[]}; sslSave(); admRender(); return; }
   if(t.dataset.pushcloud){ pushCloud(t); return; }
   if(t.dataset.clr){ DATA[t.dataset.clr]=null; dataSave(); admRender(); render();
     toast('Cleared'); return; }
@@ -5197,6 +5934,7 @@ document.addEventListener('click',e=>{
     renderEngLog(); renderQuick(); updateProg(); save(); }
   else if(t.dataset.engx!=null){ S.eng.splice(+t.dataset.engx,1); renderEngLog(); renderQuick(); updateProg(); save(); }
   else if(t.dataset.cwho){ COACH.who=t.dataset.cwho;
+    S.crewin[COACH.who]=1;        /* coaching somebody is checking them in */
     if(!COACH.topic){ const row=crewRows().find(function(c){ return c.name===COACH.who; });
       if(row){ const k=crewCoach(row,leverOf(storeRow()||{})); COACH.sug=k.pillar||''; COACH.topic=COACH.sug; } }
     coachRender(); }
@@ -5269,6 +6007,21 @@ document.addEventListener('input',e=>{
   else if(t.dataset.flywell!=null){ const k=t.dataset.flywell;
     S.fly[k]=S.fly[k]||{n:0,note:'',well:'',at:[]}; S.fly[k].well=t.value; S.fly[k].by=byNow(); }
   else if(t.dataset.reflect!=null){S.reflect=t.value;updateProg();}
+  else if(t.dataset.cq!=null){ cashInit();
+    S.cash[t.dataset.cq].n[t.dataset.d]=t.value.replace(/[^0-9]/g,''); render(); save(); return; }
+  else if(t.dataset.co!=null){ cashInit(); S.cash[t.dataset.co].other=t.value; render(); save(); return; }
+  else if(t.dataset.cn!=null){ cashInit(); S.cash[t.dataset.cn].note=t.value; saveDebounced(); return; }
+  else if(t.dataset.cby!=null){ cashInit(); S.cash[t.dataset.cby].by=t.value; saveDebounced(); return; }
+  else if(t.dataset.cvr!=null){ cashInit(); S.cash[t.dataset.cvr].ver=t.value; saveDebounced(); return; }
+  else if(t.dataset.crewother!=null){ S.ui.crewothertxt=t.value; saveDebounced(); return; }
+  else if(t.dataset.cdraw!=null){ cashInit(); S.cash.drawer=t.value; saveDebounced(); return; }
+  else if(t.dataset.clog!=null){ cashInit(); S.cash.log=t.value; render(); save(); return; }
+  else if(t.dataset.amtyped!=null){ cashInit(); S.cash.amTyped=t.value; render(); save(); return; }
+  else if(t.dataset.dr!=null){ cashInit();
+    const i=+t.dataset.dr; S.cash.drops[i]=S.cash.drops[i]||{amt:'',mgr:'',emp:''};
+    S.cash.drops[i][t.dataset.f]=t.value;
+    if(t.dataset.f==='amt'){ render(); save(); } else saveDebounced();
+    return; }
   else if(t.dataset.m!=null){                                  // shared sales-metric grids
     S[t.dataset.m][t.dataset.k]=t.value;
     if(t.dataset.k==='goal') S[t.dataset.m].goalFrom='';
@@ -5293,6 +6046,7 @@ document.getElementById('store').addEventListener('change',e=>{
   save(); syncLabel();
   render();   /* the numbers, coaching and crew panels are store specific */
   cloudPull();   /* a different store is a different set of numbers */
+  SCHLOAD={state:'',code:'',msg:''}; SCHED=null; schedSave(); schedPull();
 });
 document.getElementById('storeother').addEventListener('input',e=>{S.header.storeother=e.target.value;saveDebounced();});
 document.getElementById('closeat').addEventListener('change',e=>{S.header.closeat=e.target.value;render();save();});
@@ -5364,6 +6118,12 @@ function adopt(s){
      the tablet lost who was working and everything they had written about
      them. They are saved; they have to be read too. */
   S.crewin=s.crewin||{}; S.fly=s.fly||{}; S.one=s.one||{};
+  S.crewout=s.crewout||{}; S.crewadd=s.crewadd||{};
+  S.rosterlog=Array.isArray(s.rosterlog)?s.rosterlog:[];
+  /* Same bug, same place: the cash count was saved and then dropped on the
+     way back in. A reloaded tablet lost the morning count, which is the one
+     number the closer's over/short is reconciled against. */
+  S.cash=s.cash||null; cashInit();
   if(S.header.ddate) S.header.ddate=toIso(S.header.ddate)||S.header.ddate;
   S.aor={};
   Object.entries(s.aor||{}).forEach(([k,v])=>{S.aor[k]=Object.assign({photos:[]},v,{photos:[]});});
@@ -5387,6 +6147,8 @@ function freshDay(src){
             openat:h.openat, closeat:h.closeat};
   S.shift=''; S.items={}; S.at={}; S.by={}; S.up={}; S.ex={}; S.ui={}; S.aor={}; S.impact={};
   S.openm={}; S.eod={}; S.cancels=[]; S.gsi=[]; S.eng=[]; S.reflect=''; S.crewin={}; S.fly={}; S.one={};
+  S.crewout={}; S.crewadd={}; S.rosterlog=[];
+  S.cash=null; cashInit();          /* a new day starts with an uncounted drawer */
   syncHeaderInputs();
   document.getElementById('btn-open').classList.remove('on');
   document.getElementById('btn-close').classList.remove('on');
@@ -5777,14 +6539,30 @@ function recordBody(x,thumbs){
   const c=x.engagement.counts||{};
   const p2i=(c.guest||0)+(c.exit||0)+(c.assoc||0);
 
+  /* Everything still open, not just the checklist rows. A record that said
+     26 of 27 beside "0 not answered" was the thing that sent five leaders
+     hunting for an item that was not on any list. */
+  const open=(typeof leftItems==='function')?leftItems():[];
+  const shortBy=Math.max(0,(m.total||0)-(m.done||0));
+
   /* ── scorecard ── */
   out.push('<div class="score">'+
-    '<div><b>'+m.done+' / '+m.total+'</b><span>Checklist complete</span></div>'+
+    '<div><b class="'+(shortBy?'warn':'good')+'">'+m.done+' / '+m.total+'</b><span>Checklist complete</span></div>'+
     '<div><b class="'+(flags.length?'warn':'good')+'">'+flags.length+'</b><span>Flagged</span></div>'+
-    '<div><b class="'+(missed.length?'warn':'good')+'">'+missed.length+'</b><span>Not answered</span></div>'+
+    '<div><b class="'+(shortBy?'warn':'good')+'">'+shortBy+'</b><span>Not answered</span></div>'+
     '<div><b>'+esc(x.metrics.closeRate||'—')+'</b><span>Close rate</span></div>'+
     '<div><b>'+p2i+'</b><span>Floor touchpoints</span></div>'+
     '</div>');
+
+  if(shortBy){
+    out.push('<section><h2>Filed short</h2>'+
+      '<div class="ex"><div class="w">This shift was filed with '+shortBy+
+      ' item'+(shortBy===1?'':'s')+' not done<small>the leader chose to file it rather than hold it</small></div>'+
+      (open.length?'<ul class="miss">'+open.map(function(o){
+        return '<li>'+esc(o.label)+(o.where?' <span class="na">&middot; '+esc(o.where)+'</span>':'')+'</li>';
+      }).join('')+'</ul>':'')+
+      '</div></section>');
+  }
 
   /* ── by element: the perfect-store framework, not a list of rows ── */
   const roll=elementRoll(x);
@@ -5854,6 +6632,63 @@ function recordBody(x,thumbs){
       '<h3>Additional notes</h3><div class="narr">'+txt(x.metrics.notes,'Nothing recorded')+'</div></section>');
   }
 
+  /* The cash count, so the sheet that used to be printed and filed is in the
+     record instead. Only what was actually counted is printed: a drawer
+     nobody touched says so rather than showing a column of zeros. */
+  (function(){
+    cashInit();
+    const closing=(m.shift==='CLOSING'), side=closing?'pm':'am';
+    if(!cashTouched(side) && !cashTouched('am')) return;
+    out.push('<section><h2>Cash drawer \u00b7 '+(closing?'night count':'morning count')+'</h2>');
+    if(S.cash.drawer) out.push('<h3>Drawer '+esc(S.cash.drawer)+'</h3>');
+    out.push('<table><tr><th>Denomination</th><th>Count</th><th>Amount</th></tr>');
+    const sd=cashSide(side);
+    DENOMS.forEach(function(d){
+      const q=parseInt(sd.n[d[0]],10);
+      if(!isFinite(q)||!q) return;
+      out.push('<tr><td>'+esc(d[1])+'</td><td class="n">'+q+'</td><td class="n">'+money(q*d[2])+'</td></tr>');
+    });
+    const o=parseFloat(String(sd.other).replace(/[^0-9.-]/g,''));
+    if(isFinite(o)&&String(sd.other).trim()!=='')
+      out.push('<tr><td>Other'+(sd.note?' \u00b7 '+esc(sd.note):'')+'</td><td class="n">\u2014</td><td class="n">'+money(o)+'</td></tr>');
+    out.push('<tr><th>Total cash</th><th></th><th class="n">'+money(cashCounted(side))+'</th></tr></table>');
+    const who=[];
+    if(sd.by) who.push('Counted by '+esc(sd.by));
+    if(sd.ver) who.push('verified by '+esc(sd.ver));
+    if(who.length) out.push('<p class="miss">'+who.join(', ')+'</p>');
+    const drops=S.cash.drops.filter(function(d){ return String(d.amt||'').trim()!==''; });
+    if(drops.length){
+      out.push('<h3>Drop verification</h3><table><tr><th>Drop</th><th>Amount</th><th>Mgr</th><th>Emp</th></tr>');
+      S.cash.drops.forEach(function(d,i){
+        if(String(d.amt||'').trim()==='') return;
+        out.push('<tr><td>Drop #'+(i+1)+'</td><td class="n">'+esc(d.amt)+'</td><td>'+
+          (d.mgr?esc(d.mgr):'<span class="na">not initialled</span>')+'</td><td>'+
+          (d.emp?esc(d.emp):'<span class="na">not initialled</span>')+'</td></tr>');
+      });
+      out.push('</table>');
+    }
+    if(closing){
+      const r=cashRecon();
+      out.push('<h3>The close</h3><table>');
+      out.push('<tr><td>Total cash counted</td><td class="n">'+money(r.pm)+'</td></tr>');
+      out.push('<tr><td>Less morning count'+
+        (r.am&&r.am.by?' <span class="na">(counted by '+esc(r.am.by)+')</span>':
+         r.am&&r.am.src==='typed'?' <span class="na">(typed in at close)</span>':'')+
+        '</td><td class="n">'+
+        (r.am==null?'<span class="na">not recorded</span>':money(r.am.v))+'</td></tr>');
+      out.push('<tr><td>Plus drops</td><td class="n">'+money(r.drops)+'</td></tr>');
+      out.push('<tr><td>Cash taken in</td><td class="n">'+
+        (r.takenIn==null?'<span class="na">not calculated</span>':money(r.takenIn))+'</td></tr>');
+      out.push('<tr><td>Less cash on the log sheet</td><td class="n">'+
+        (r.log==null?'<span class="na">not entered</span>':money(r.log))+'</td></tr>');
+      if(r.over==null) out.push('<tr><th>Over / (short)</th><th class="n"><span class="na">not calculated</span></th></tr>');
+      else out.push('<tr><th>Over / (short)</th><th class="n '+(Math.abs(r.over)<0.005?'good':'bad')+'">'+
+        money(r.over)+'</th></tr>');
+      out.push('</table>');
+    }
+    out.push('</section>');
+  })();
+
   out.push('<section><h2>Guest service issues</h2>');
   const gsir=x.gsi.filter(function(g){ return g&&g.done; });
   if(gsir.length){
@@ -5907,6 +6742,26 @@ function recordBody(x,thumbs){
   /* ── 6. the people ── */
   const ppl=x.people||[];
   out.push('<section><h2>The team today</h2>');
+  /* The plan against the floor. Printed before the coaching, because who was
+     actually in the building is what the rest of this section means. */
+  const rd=x.roster||null;
+  if(rd&&rd.published){
+    out.push('<div class="kv">'+
+      '<div><span>On the schedule</span><b>'+rd.scheduled.length+'</b></div>'+
+      '<div><span>Worked</span><b>'+rd.worked.length+'</b></div>'+
+      '<div><span>Not in</span><b class="'+(rd.out.length?'warn':'good')+'">'+rd.out.length+'</b></div>'+
+      '<div><span>Came in extra</span><b>'+rd.added.length+'</b></div>'+
+      '</div>');
+    if(rd.out.length) out.push('<p class="na">Not in: '+esc(rd.out.map(function(o){
+      return o.who+(o.why?' ('+o.why+')':''); }).join(', '))+'</p>');
+    if(rd.added.length) out.push('<p class="na">Not on the schedule but worked: '+
+      esc(rd.added.join(', '))+'</p>');
+    if(rd.unaccounted.length) out.push('<p class="na">Scheduled and not accounted for: '+
+      esc(rd.unaccounted.join(', '))+'</p>');
+  } else if(rd){
+    out.push('<p class="na">No published schedule for this day, so the roster was '+
+      'checked in by hand.</p>');
+  }
   if(ppl.length){
     ppl.forEach(function(p){
       const seen=Object.keys(p.seen).map(function(k){ return p.seen[k]+' '+k.toLowerCase(); });
@@ -6020,6 +6875,58 @@ function printRecord(){ toast('Choose Save to Files'); setTimeout(()=>window.pri
 function savePDF(){ openRecord(true); }
 
 /* ───────── SUBMIT ───────── */
+/* ── FILING A SHIFT THAT IS NOT FINISHED ───────────────────────────────
+   Submit used to be locked until the last item was ticked. The intent was
+   that an unfinished shift should not look finished, and that still holds.
+   What it actually did was lose shifts: a leader who could not get to one
+   item, or who hit a shift that genuinely had nothing to tick, had the whole
+   record held hostage on a tablet where nobody upstream could see any of it.
+
+   So the gate becomes a question rather than a wall. The button says how many
+   are open, the confirm names them, and the record and the summary both carry
+   that it went in short, with the list. Filing it incomplete is a decision a
+   leader makes on the record, not a thing they can do by accident.
+   ──────────────────────────────────────────────────────────────────────── */
+function missingNow(){
+  if(!S.shift) return [];
+  const t=totals();
+  if(!t.total||t.done>=t.total) return [];
+  return leftItems();
+}
+function askIncomplete(){
+  const left=missingNow();
+  return new Promise(function(resolve){
+    const wrap=document.getElementById('surewrap');
+    const body=document.getElementById('surebody');
+    if(!wrap||!body){ resolve(true); return; }
+    const SHOW=10;
+    body.innerHTML='<h3>'+left.length+' thing'+(left.length===1?'':'s')+' not done</h3>'+
+      '<p>You can file it anyway. It goes in marked short, and these show on the record '+
+      'your market leader reads.</p>'+
+      '<ul class="surelist">'+
+        left.slice(0,SHOW).map(function(x){
+          return '<li><b>'+esc(x.label)+'</b><em>'+esc(x.where||'')+'</em></li>'; }).join('')+
+      '</ul>'+
+      (left.length>SHOW?'<p class="suremore">and '+(left.length-SHOW)+' more</p>':'')+
+      '<div class="surebtns">'+
+        '<button type="button" class="sb-go" data-sure="no">Go back and finish</button>'+
+        '<button type="button" class="sb-yes" data-sure="yes">File it short</button>'+
+      '</div>';
+    wrap.classList.add('open');
+    const done=function(yes){
+      wrap.classList.remove('open');
+      wrap.removeEventListener('click',onTap);
+      resolve(yes);
+    };
+    const onTap=function(e){
+      const t=e.target.closest('[data-sure]');
+      if(t){ done(t.dataset.sure==='yes'); return; }
+      if(e.target===wrap) done(false);     /* tapping the backdrop is a no */
+    };
+    wrap.addEventListener('click',onTap);
+  });
+}
+
 async function submitDay(){
   if(FB_ON && !signedIn()){
     signOpen('Sign in to file this shift. Your market leader reads it in the '+
@@ -6027,6 +6934,10 @@ async function submitDay(){
     return;
   }
   if(!FB_ON && !FLOW_URL){toast('Central save not set up yet — use Preview / PDF for now.');return;}
+  if(missingNow().length){
+    const go=await askIncomplete();
+    if(!go) return;
+  }
   const btn=document.getElementById('subBtn');
   btn.disabled=true; btn.textContent='Building record…';
   SYNC.inflight=true; syncLabel();
@@ -6383,6 +7294,7 @@ async function cloudPull(force){
     reapplyGoals();
     dataSave(); histSave();
     CLOUD={state:'ok',code:code,day:got.day,built:got.built,msg:''};
+    schedPull(true);                        /* the day's schedule, same trip */
     LEADER_SIG=null;                      /* the leader list came with the data */
     renderLeaderField();
     render();
@@ -6392,6 +7304,280 @@ async function cloudPull(force){
     cloudBand();
   }
   CLOUD_BUSY=false;
+}
+
+/* ═══════ THE BRIDGE: SMART SCHEDULER → SCOREBOARD ════════════════════
+   The Smart Scheduler lives on its own Firebase project, smart-scheduler-1915,
+   and this board lives on field-leader-1915. A sign-in to one is worthless to
+   the other, so the Scheduler cannot write the schedule here on its own and
+   this board cannot read it there. Something has to stand in both projects at
+   once, and the only thing that does is the master copy, because the owner has
+   an account in both.
+
+   So the pull runs here, in the gear, as the owner: sign in to the Scheduler,
+   read the posted rosters, convert them, and write one sbsched document per
+   store with the token this board already holds. The Smart Scheduler is not
+   touched, which matters, because 41 people use it every week.
+
+   Nothing from the Scheduler's project ships in the public page. The key and
+   the sign-in live in the master's own storage, same as the owner's gear.
+
+   The day both apps end up on one Firebase project, this whole file comes out
+   and nothing else changes: the contract on the far side is the same document.
+   ──────────────────────────────────────────────────────────────────────── */
+const SS_PROJ='smart-scheduler-1915';
+const SS_CFG_URL='https://fpina-1915south.github.io/smart-schedule/config.js';
+const SSK='1915_ss_link';
+var SSL={key:'', email:'', token:'', refresh:'', exp:0, covers:'', pulled:0};
+/* Does the last pull still reach today? This is the whole reason a weekly job
+   is safe to leave weekly: one pull carries seven days, and the gear can see
+   the moment it stops reaching. */
+function schedCovers(){ return !!(SSL.covers && SSL.covers>=localDay()); }
+var SSRUN={state:'', msg:'', rows:[]};
+
+function sslLoad(){ try{ SSL=Object.assign(SSL,JSON.parse(localStorage.getItem(SSK)||'{}')); }catch(e){} }
+function sslSave(){
+  try{ localStorage.setItem(SSK,JSON.stringify({key:SSL.key, email:SSL.email,
+         token:SSL.token, refresh:SSL.refresh, exp:SSL.exp,
+         covers:SSL.covers||'', pulled:SSL.pulled||0})); }catch(e){}
+}
+/* The Scheduler publishes its own config, so the key does not have to be typed
+   in. It is only a project name in disguise and grants nothing on its own, but
+   if the fetch is blocked the gear takes it by hand rather than giving up. */
+async function ssKey(){
+  if(SSL.key) return SSL.key;
+  try{
+    const r=await fetch(SS_CFG_URL,{cache:'no-store'});
+    if(r.ok){
+      const t=await r.text();
+      const m=t.match(/apiKey\s*:\s*["']([^"']+)["']/);
+      if(m){ SSL.key=m[1]; sslSave(); return SSL.key; }
+    }
+  }catch(e){}
+  throw new Error('Paste the Smart Scheduler key once, below.');
+}
+async function ssToken(){
+  if(SSL.token && Date.now()<SSL.exp-60000) return SSL.token;
+  if(!SSL.refresh) throw new Error('Sign in to the Smart Scheduler first.');
+  const key=await ssKey();
+  const r=await fetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(key),{
+    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(SSL.refresh)});
+  if(!r.ok) throw new Error('The Smart Scheduler sign-in expired. Sign in again.');
+  const j=await r.json();
+  SSL.token=j.id_token; SSL.refresh=j.refresh_token;
+  SSL.exp=Date.now()+(parseInt(j.expires_in,10)||3600)*1000;
+  sslSave(); return SSL.token;
+}
+async function ssSignIn(email,pw){
+  const key=await ssKey();
+  const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+encodeURIComponent(key),{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email, password:pw, returnSecureToken:true})});
+  const j=await r.json();
+  if(!r.ok) throw new Error(ssErr((j.error&&j.error.message)||('HTTP '+r.status)));
+  SSL.email=email; SSL.token=j.idToken; SSL.refresh=j.refreshToken;
+  SSL.exp=Date.now()+(parseInt(j.expiresIn,10)||3600)*1000;
+  sslSave(); return true;
+}
+function ssErr(code){
+  if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(code))
+    return 'That is not the Smart Scheduler sign-in for this address.';
+  if(/TOO_MANY/.test(code)) return 'Too many tries. Give it a minute.';
+  return String(code);
+}
+
+/* ── Reading what the Scheduler holds ──────────────────────────────────── */
+/* Firestore REST hands back typed values and the roster documents are nested
+   two deep, so this unwraps the whole thing rather than the flat read the
+   numbers use. */
+function fbDeep(v){
+  if(v==null) return null;
+  if('stringValue' in v) return v.stringValue;
+  if('integerValue' in v) return Number(v.integerValue);
+  if('doubleValue' in v) return Number(v.doubleValue);
+  if('booleanValue' in v) return !!v.booleanValue;
+  if('timestampValue' in v) return v.timestampValue;
+  if('nullValue' in v) return null;
+  if('arrayValue' in v) return ((v.arrayValue.values)||[]).map(fbDeep);
+  if('mapValue' in v){ const o={}; const f=(v.mapValue.fields)||{};
+    Object.keys(f).forEach(function(k){ o[k]=fbDeep(f[k]); }); return o; }
+  return null;
+}
+async function ssRosters(onStep){
+  const tok=await ssToken();
+  const base='https://firestore.googleapis.com/v1/projects/'+SS_PROJ+
+             '/databases/(default)/documents/rosters';
+  const out=[]; let page='';
+  for(let i=0;i<20;i++){
+    const url=base+'?pageSize=200'+(page?('&pageToken='+encodeURIComponent(page)):'');
+    const r=await fetch(url,{headers:{'Authorization':'Bearer '+tok}});
+    if(r.status===403) throw new Error('This sign-in cannot read the Scheduler’s rosters.');
+    if(!r.ok) throw new Error('Scheduler read failed: '+r.status);
+    const j=await r.json();
+    (j.documents||[]).forEach(function(d){
+      const o={}; const f=d.fields||{};
+      Object.keys(f).forEach(function(k){ o[k]=fbDeep(f[k]); });
+      o.__id=String(d.name||'').split('/').pop();
+      out.push(o);
+    });
+    if(onStep) onStep(out.length);
+    page=j.nextPageToken||''; if(!page) break;
+  }
+  return out;
+}
+
+/* ── Turning a week of Scheduler rows into the contract ────────────────── */
+function isoPlus(iso,n){
+  const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return '';
+  const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
+  d.setUTCDate(d.getUTCDate()+n);
+  return d.toISOString().slice(0,10);
+}
+/* A shift time can arrive as "09:30", as "9:30a", as minutes past midnight, or
+   as a small object. Anything it cannot read comes back blank, which only
+   costs the hours on a chip, never the person. */
+function ssTime(v){
+  if(v==null||v==='') return '';
+  if(typeof v==='number'&&isFinite(v)){
+    if(v>=0&&v<=1440){ const h=Math.floor(v/60), m=v%60;
+      return ('0'+h).slice(-2)+':'+('0'+m).slice(-2); }
+    return '';
+  }
+  if(typeof v==='object') return ssTime(v.t!=null?v.t:(v.time!=null?v.time:(v.h!=null?(v.h*60+(v.m||0)):null)));
+  const s=String(v).trim();
+  const m=s.match(/^(\d{1,2})\s*:?\s*(\d{2})?\s*([ap])?/i);
+  if(!m) return '';
+  let h=parseInt(m[1],10); const mi=m[2]||'00';
+  if(!isFinite(h)) return '';
+  if(m[3]){ const pm=/p/i.test(m[3]); if(pm&&h<12) h+=12; if(!pm&&h===12) h=0; }
+  return ('0'+h).slice(-2)+':'+mi;
+}
+/* A shift never ends before it starts. The Scheduler lets a leader type a bare
+   "7" for a close, which reads as 07:00 and would publish a nine hour shift
+   backwards. Where the end carries no am or pm of its own and lands before the
+   start, it is the afternoon. */
+function ssPair(a,b,rawB){
+  if(!a||!b) return {start:a,end:b};
+  if(/[ap]/i.test(String(rawB==null?'':rawB))) return {start:a,end:b};
+  const mins=function(t){ const q=t.split(':'); return (+q[0])*60+(+q[1]); };
+  if(mins(b)<mins(a)){
+    const n=mins(b)+720;
+    if(n<1440) b=('0'+Math.floor(n/60)).slice(-2)+':'+('0'+(n%60)).slice(-2);
+  }
+  return {start:a,end:b};
+}
+/* One person's entry for one day of the week, whatever shape it is in. */
+function ssDay(p,di){
+  const d=(Array.isArray(p.days)?p.days[di]:null);
+  if(d==null||d==='') return null;
+  if(typeof d==='string'){
+    if(/^(off|pto|x|-)$/i.test(d.trim())) return null;
+    const parts=d.split(/\s*(?:-|to|–)\s*/);
+    const a=ssTime(parts[0]), b=ssTime(parts[1]);
+    return (a||b)?ssPair(a,b,parts[1]):null;
+  }
+  if(typeof d!=='object') return null;
+  if(d.off===true||/^(off|pto)$/i.test(String(d.type||d.code||''))) return null;
+  const rawB=(d.out!=null?d.out:d.end);
+  const a=ssTime(d.in!=null?d.in:d.start), b=ssTime(rawB);
+  return (a||b)?ssPair(a,b,rawB):null;
+}
+function ssWeekDays(doc){
+  const week=String(doc.week||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(week)) return null;
+  const people=Array.isArray(doc.people)?doc.people:[];
+  const days={};
+  for(let di=0;di<7;di++){
+    const iso=isoPlus(week,di); if(!iso) continue;
+    const rows=[];
+    people.forEach(function(p){
+      if(!p) return;
+      const nm=String(p.name||'').trim();
+      if(!nm||/^open$/i.test(nm)) return;        /* an unfilled seat is not a person */
+      const t=ssDay(p,di); if(!t) return;
+      rows.push({name:nm, role:String(p.role||''), start:t.start, end:t.end});
+    });
+    if(rows.length) days[iso]=rows;
+  }
+  return Object.keys(days).length?days:null;
+}
+/* Only this week and next. An old week sitting in the collection must never
+   overwrite a store's live schedule. */
+function ssCurrent(docs){
+  const today=localDay();
+  const keep={};
+  docs.forEach(function(d){
+    const days=ssWeekDays(d); if(!days) return;
+    const covers=Object.keys(days).sort();
+    if(covers[covers.length-1]<today) return;              /* finished week */
+    const label=String(d.store||'').trim(); if(!label) return;
+    const store=matchStore(label); if(!store) return;
+    const code=sbCode(store);
+    /* a store with two live weeks keeps the one that starts later */
+    const prev=keep[code];
+    if(prev && prev.week>=String(d.week||'')) return;
+    keep[code]={code:code, store:store, label:label, week:String(d.week||''),
+                posted:!!d.posted, days:days,
+                people:Object.keys(days).reduce(function(n,k){ return Math.max(n,days[k].length); },0)};
+  });
+  return keep;
+}
+
+/* ── Writing it where the boards read it ───────────────────────────────── */
+async function sbPutSched(code,days,by){
+  const tok=await fbToken();
+  const body={fields:{
+    day:   fbVal(Object.keys(days).sort()[0]||''),
+    built: fbVal(new Date().toISOString()),
+    by:    fbVal(by||''),
+    json:  fbVal(JSON.stringify({days:days}))
+  }};
+  const r=await fetch(fbDocs()+'/'+SCH_COL+'/'+encodeURIComponent(code),{
+    method:'PATCH', headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},
+    body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return true;
+}
+/* The whole run. Reports per store rather than a single number, because a
+   store that converted to nothing is the failure worth seeing and a count of
+   41 would hide it. */
+async function ssPush(onStep){
+  SSRUN={state:'run', msg:'Reading the Scheduler…', rows:[]};
+  if(onStep) onStep();
+  const docs=await ssRosters(function(n){
+    SSRUN.msg='Read '+n+' weeks…'; if(onStep) onStep(); });
+  const keep=ssCurrent(docs);
+  const codes=Object.keys(keep);
+  if(!codes.length){
+    SSRUN={state:'none', msg:'Nothing posted for this week or next.', rows:[]};
+    if(onStep) onStep(); return SSRUN;
+  }
+  const rows=[]; let ok=0;
+  for(let i=0;i<codes.length;i++){
+    const c=keep[codes[i]];
+    SSRUN.msg='Writing '+(i+1)+' of '+codes.length+'…'; if(onStep) onStep();
+    try{
+      await sbPutSched(c.code,c.days,(AUTH.email||''));
+      rows.push({store:c.store, code:c.code, days:Object.keys(c.days).length,
+                 people:c.people, posted:c.posted, ok:true});
+      ok++;
+    }catch(e){
+      rows.push({store:c.store, code:c.code, days:0, people:0, posted:c.posted,
+                 ok:false, err:String(e.message||e).slice(0,60)});
+    }
+  }
+  /* Which stores the Scheduler had nothing live for. A silent 30 of 41 is the
+     kind of thing that gets found three weeks later. */
+  const missing=STORES.filter(function(s){ return !keep[sbCode(s)]; });
+  /* How far the schedules on file now reach, so the gear can say plainly when
+     they have run out rather than leaving it to be noticed. */
+  let far='';
+  codes.forEach(function(c){ Object.keys(keep[c].days).forEach(function(d){ if(d>far) far=d; }); });
+  SSL.covers=far; SSL.pulled=Date.now(); sslSave();
+  SSRUN={state:'done', msg:ok+' of '+codes.length+' stores written', rows:rows, missing:missing};
+  if(onStep) onStep();
+  return SSRUN;
 }
 
 /* ── One shift, one document, however many tablets ─────────────────────── */
@@ -6562,7 +7748,8 @@ function summaryOf(snap){
   return {leaderScore:sc.score, leaderScoreParts:sc.parts,
           extP2I:sc.extP2I, intP2I:sc.intP2I, oneOnOnes:ones,
           leader:who, leaderRole:(lrec?lrec.role:''), leaderFromList:!!lrec,
-          checkedIn:Object.keys(S.crewin||{}), coaching:coach,
+          checkedIn:Object.keys(S.crewin||{}), coaching:coach, roster:rosterDiff(),
+          rosterLog:(S.rosterlog||[]).map(function(e){ return {t:e.t, who:e.who, why:e.why, at:hm2(e.at), by:e.by}; }),
           /* The store NAME, the way the Field Leader App writes it. Its rules
              decide who may read a record by matching this against the stores
              array on users/{email}, and those arrays hold "Greensboro" and
@@ -6582,7 +7769,15 @@ function summaryOf(snap){
             count:(c[t.k]||0), rate:((snap.engagement.rates||{})[t.k]||'')})),
           firstTouch:snap.meta.firstTouch, lastTouch:snap.meta.lastTouch,
           elements:elementRoll(snap),
-          exceptions:ex, missed:miss};
+          exceptions:ex, missed:miss,
+          scheduled:((snap.roster||{}).scheduled||[]).length,
+          worked:((snap.roster||{}).worked||[]).length,
+          rosterOut:((snap.roster||{}).out||[]).map(function(o){ return o.who+(o.why?' ('+o.why+')':''); }),
+          rosterAdded:((snap.roster||{}).added||[]),
+          schedulePublished:!!((snap.roster||{}).published),
+          shortBy:Math.max(0,(snap.meta.total||0)-(snap.meta.done||0)),
+          openItems:((typeof leftItems==='function')?leftItems():[]).map(function(o){
+            return (o.where?o.where+' \u00b7 ':'')+o.label; })};
 }
 
 async function pushRecord(mode){
@@ -6752,6 +7947,7 @@ async function signGo(mode){
     /* Anything that has been waiting on a sign-in goes now. */
     syncLabel(); updateProg();
     cloudPull(true);   /* the numbers were waiting on this */
+    schedPull(true);
     if(S.shift && totals().done) checkpoint();
   }catch(e){ err.textContent=e.message||'Could not sign in.'; }
   btn.disabled=false; if(other) other.disabled=false;
@@ -6836,9 +8032,9 @@ document.addEventListener('visibilitychange',function(){
 });
 
 /* ───────── INIT ───────── */
-buildStores(); buildDates(); dataLoad(); oneLoad(); histLoad(); authLoad();
+buildStores(); buildDates(); dataLoad(); oneLoad(); histLoad(); authLoad(); schedLoad(); sslLoad();
 restore(); if(S.shift) metSeed(); render(); photoLoad(); signWire(); whoLabel(); syncLabel();
-cloudBand(); cloudPull();
+cloudBand(); cloudPull(); schedPull();
 gearPaint();
 /* Nothing is asked of a leader until they have actually started a shift, and
    never more than once, because a sign-in box in front of the checklist every
