@@ -847,6 +847,42 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .glist{margin:2px 0 10px;padding-left:20px;}
 .glist li{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
+.grp.gsopen h2{background:#7A3B16;}
+.grp.planback h2{background:var(--navy2);}
+.grp.half h2{background:var(--navy);}
+.saidq{margin:4px 0 0;padding:10px 12px;border-left:3px solid var(--orange);
+  background:var(--ice);border-radius:0 8px 8px 0;font-size:14px;line-height:1.4;color:var(--ink);}
+.pbbtns,.hfbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.pbb,.hfb{flex:1 1 30%;min-height:50px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font:600 14px/1.15 inherit;color:var(--ink);-webkit-appearance:none;cursor:pointer;padding:4px 6px;}
+.hfb{flex:1 1 46%;}
+.pbb.on,.hfb.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.hfb.sug{border-color:var(--orange);border-width:2px;}
+.pbnote,.hfnote{width:100%;min-height:58px;margin:8px 0 0;padding:8px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:14px;-webkit-appearance:none;}
+.hfgrid{display:flex;flex-direction:column;gap:6px;}
+.hfrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:2px 10px;
+  padding:9px 11px;border-radius:9px;background:#F4F7F7;border:1px solid var(--line);}
+.hfrow.good{background:#E6F4EC;border-color:#BBDFCB;}
+.hfrow.bad{background:#FBEDE8;border-color:#E9BFAE;}
+.hfrow span{font-size:13px;color:var(--ink);}
+.hfrow b{font-size:15px;white-space:nowrap;text-align:right;}
+.hfrow i{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--muted);}
+.hfbeh{margin-top:9px;padding:10px 11px;border-radius:9px;background:var(--ice);
+  font-size:13px;line-height:1.4;color:var(--ink);}
+.gsrow{border:1px solid #E6DCCF;border-radius:10px;padding:10px 11px;margin-bottom:9px;background:#FFFBF5;}
+.gshead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.gshead b{font-size:14px;color:var(--ink);}
+.gshead em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap;}
+.gstxt{margin:6px 0 0;font-size:13px;line-height:1.35;color:var(--ink);}
+.gstxt.sub{color:var(--muted);font-size:12px;}
+.gsnote{width:100%;min-height:54px;margin:8px 0 0;padding:8px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:14px;-webkit-appearance:none;}
+.gsbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.gsb{flex:1 1 30%;min-height:48px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font:600 13px/1.15 inherit;color:var(--ink);-webkit-appearance:none;cursor:pointer;padding:4px 6px;}
+.gsb.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.gsb.done.on{background:var(--ok);border-color:var(--ok);}
 .nowblk.file{background:#FBEDE8;border:1px solid #E9BFAE;}
 .nowblk.file h4{color:var(--flag);}
 .nowblk.file.amb{background:#FDF3E3;border-color:#EBD3A6;}
@@ -1181,7 +1217,7 @@ function leadersToday(){
   add(byNow());
   return seen;
 }
-let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{},cash:{}};
+let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{},cash:{},gsres:{},half:{},planback:{}};
 
 /* Engagement types — P2I on the floor, internal and external */
 /* 'presence' is the leader showing up. 'selling' is what the consultant ran
@@ -1350,6 +1386,8 @@ function render(){
      who produced them are one thought, and splitting them put a checklist
      between the question and the answer. */
   const cwr=buildCrew(); if(cwr) host.appendChild(cwr);
+  /* Halfway through the hours this store actually keeps. */
+  const hft=buildHalftime(); if(hft) host.appendChild(hft);
   /* The team comes before the leader's own score. A leader opening this
      should see the people they are there to coach, then how involved they
      have been with them, not the other way round. */
@@ -1428,6 +1466,9 @@ function render(){
     host.appendChild(buildEngagement());
   }
   const sh=buildShifts(); if(sh) host.appendChild(sh);
+  /* What the last shift left a guest waiting on, before anything else today. */
+  const gso=buildOpenIssues(); if(gso) host.appendChild(gso);
+  const pbk=buildPlanBack(); if(pbk) host.appendChild(pbk);
   host.appendChild(buildCash());
   if(S.shift==='OPENING') host.appendChild(buildOpeningMetrics());
   if(S.shift==='CLOSING') host.appendChild(buildEOD());
@@ -6272,6 +6313,7 @@ document.addEventListener('click',e=>{
     S.cancels.splice(i,1); renderCancels(); updateProg(); save(); }
   else if(t.dataset.gsiadd){ S.gsi.push({}); renderGSI(); save(); }
   else if(t.dataset.gsisave!=null){ const g=S.gsi[+t.dataset.gsisave];
+    gsId(g);   /* so a later shift can speak about the same issue */
     if(!gsiReady(g)){ toast('Add the ticket number, the order number or what happened before you save it'); return; }
     g.done=1; g.at=g.at||new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
     renderGSI(); save();
@@ -6286,6 +6328,23 @@ document.addEventListener('click',e=>{
   else if(t.classList.contains('gsi-x')){ S.gsi.splice(+t.dataset.i,1); renderGSI(); save(); }
   else if(t.dataset.gsiout!=null){ const g=S.gsi[+t.dataset.gsiout];
     g.outcome=(g.outcome===t.dataset.v)?'':t.dataset.v; renderGSI(); save(); }
+  else if(t.dataset.hfc){ S.half=S.half||{};
+    S.half.calls=Math.max(0,(parseInt(S.half.calls,10)||0)+(+t.dataset.hfc));
+    render(); save(); }
+  else if(t.dataset.hff){ S.half=S.half||{};
+    S.half.focus=(S.half.focus===t.dataset.hff)?'':t.dataset.hff; render(); save(); }
+  else if(t.dataset.pb){ S.planback=S.planback||{};
+    S.planback.state=(S.planback.state===t.dataset.pb)?'':t.dataset.pb; render(); save(); }
+  else if(t.dataset.gskeep){ const k=t.dataset.gskeep;
+    S.gsres=S.gsres||{}; const r=S.gsres[k]=S.gsres[k]||{};
+    r.state=(r.state==='open')?'':'open'; r.outcome='';
+    render(); save(); }
+  else if(t.dataset.gsclose){ const k=t.dataset.gsclose;
+    S.gsres=S.gsres||{}; const r=S.gsres[k]=S.gsres[k]||{};
+    if(r.state==='closed'&&r.outcome===t.dataset.v){ r.state=''; r.outcome=''; }
+    else { r.state='closed'; r.outcome=t.dataset.v; }
+    render(); save();
+    if(S.gsres[k].state==='closed') toast('Closed. It comes off every tablet at this store.'); }
   else if(t.dataset.rsn!=null){ const c=S.cancels[+t.dataset.rsn];
     c.reason=(c.reason===t.dataset.v)?'':t.dataset.v; renderCancels(); save(); }
   else if(t.dataset.yn!=null){ const c=S.cancels[+t.dataset.yn]; c[t.dataset.f]=(c[t.dataset.f]===t.dataset.v)?'':t.dataset.v; renderCancels(); save(); }
@@ -6345,6 +6404,10 @@ document.addEventListener('input',e=>{
   else if(t.dataset.eod!=null){S.eod[t.dataset.eod]=t.value;}       // EOD narrative fields
   else if(t.dataset.cx!=null){S.cancels[+t.dataset.cx]=S.cancels[+t.dataset.cx]||{};S.cancels[+t.dataset.cx][t.dataset.f]=t.value;}
   else if(t.dataset.gsi!=null){S.gsi[+t.dataset.gsi]=S.gsi[+t.dataset.gsi]||{};S.gsi[+t.dataset.gsi][t.dataset.f]=t.value;}
+  else if(t.dataset.hfn!=null){S.half=S.half||{};S.half.note=t.value;}
+  else if(t.dataset.pbnote!=null){S.planback=S.planback||{};S.planback.note=t.value;}
+  else if(t.dataset.gsnote){S.gsres=S.gsres||{};
+    const r=S.gsres[t.dataset.gsnote]=S.gsres[t.dataset.gsnote]||{}; r.note=t.value;}
   saveDebounced();
 });
 document.getElementById('ddate').addEventListener('change',function(){
@@ -6422,6 +6485,16 @@ function save(){
   try{ const light=JSON.parse(JSON.stringify(S));
     Object.values(light.aor).forEach(o=>{o.photos=[];});
     light.savedOn=localDay();
+    /* ── WHETHER THIS DAY WENT IN ──────────────────────────────────────
+       Submitting was only ever held in memory, so the tablet forgot it the
+       moment the page reloaded. Two things went wrong because of that. The
+       next morning the board offered to resume a shift that was already
+       filed, which is how yesterday's ticks end up on today's record. And a
+       leader who filed and then reopened the board was asked to file again.
+       So it is written down with the day. */
+    light.filed=(typeof SYNC!=='undefined'&&SYNC.submitted)
+      ? {at:SYNC.at||'', dirty:!!SYNC.dirty, shift:S.shift||'', day:localDay()}
+      : null;
     localStorage.setItem(SK,JSON.stringify(light)); }catch(e){}
   if(typeof SYNC!=='undefined'&&SYNC.submitted&&!SYNC.quiet){
     SYNC.dirty=true;
@@ -6454,6 +6527,8 @@ function adopt(s){
   S.crewin=s.crewin||{}; S.fly=s.fly||{}; S.one=s.one||{};
   S.crewout=s.crewout||{}; S.crewadd=s.crewadd||{};
   S.rosterlog=Array.isArray(s.rosterlog)?s.rosterlog:[];
+  S.gsres=s.gsres||{};
+  S.half=s.half||{}; S.planback=s.planback||{};
   /* Same bug, same place: the cash count was saved and then dropped on the
      way back in. A reloaded tablet lost the morning count, which is the one
      number the closer's over/short is reconciled against. */
@@ -6481,7 +6556,7 @@ function freshDay(src){
             openat:h.openat, closeat:h.closeat};
   S.shift=''; S.items={}; S.at={}; S.by={}; S.up={}; S.ex={}; S.ui={}; S.aor={}; S.impact={};
   S.openm={}; S.eod={}; S.cancels=[]; S.gsi=[]; S.eng=[]; S.reflect=''; S.crewin={}; S.fly={}; S.one={};
-  S.crewout={}; S.crewadd={}; S.rosterlog=[];
+  S.crewout={}; S.crewadd={}; S.rosterlog=[]; S.gsres={}; S.half={}; S.planback={};
   S.cash=null; cashInit();          /* a new day starts with an uncounted drawer */
   syncHeaderInputs();
   document.getElementById('btn-open').classList.remove('on');
@@ -6496,9 +6571,24 @@ function restore(){
   if(!raw){ freshDay(); return; }
   let s=null; try{ s=JSON.parse(raw); }catch(e){ freshDay(); return; }
   const stamp=s.savedOn||'';
-  if(stamp && stamp!==localDay() && hasWork(s)){ CARRY=s; freshDay(s.header); return; }
-  if(!stamp && hasWork(s) && (s.header||{}).ddate && toIso((s.header||{}).ddate)!==localDay()){ CARRY=s; freshDay(s.header); return; }
+  const filed=s.filed||null;
+  /* A filed day is finished. It is never offered back as something to resume,
+     because resuming it would put yesterday's work on today's record. */
+  const wasFiled=!!(filed&&!filed.dirty);
+  if(stamp && stamp!==localDay() && hasWork(s)){
+    if(!wasFiled) CARRY=s;
+    freshDay(s.header); return;
+  }
+  if(!stamp && hasWork(s) && (s.header||{}).ddate && toIso((s.header||{}).ddate)!==localDay()){
+    if(!wasFiled) CARRY=s;
+    freshDay(s.header); return;
+  }
   adopt(s);
+  /* Same day, already filed: the board goes back to saying so rather than
+     asking for a shift that is already upstream. */
+  if(filed && filed.day===localDay() && filed.shift===(S.shift||'') && typeof SYNC!=='undefined'){
+    SYNC.submitted=true; SYNC.dirty=!!filed.dirty; SYNC.at=filed.at||'';
+  }
   if(!has(S.header.ddate)){ S.header.ddate=localDay(); syncHeaderInputs(); }
   else if(S.header.ddate!==toIso(S.header.ddate)){ S.header.ddate=toIso(S.header.ddate); syncHeaderInputs(); }
 }
@@ -8061,7 +8151,11 @@ function shiftRows(){
             leader:r.leader||'', done:r.done, total:r.total,
             status:r.status||'', flags:r.flagCount||0,
             short:r.shortBy||0, open:r.openItems||[],
-            handoff:r.handoff||'', worked:r.worked||0, scheduled:r.scheduled||0};
+            handoff:r.handoff||'', worked:r.worked||0, scheduled:r.scheduled||0,
+            reflection:r.reflection||'',
+            openIssues:Array.isArray(r.openIssues)?r.openIssues:[],
+            closedIssues:Array.isArray(r.closedIssues)?r.closedIssues:[],
+            issueUpd:Array.isArray(r.issueUpd)?r.issueUpd:[]};
   }).filter(function(r){ return r.date; });
 }
 /* The one a leader actually wants: the shift immediately before theirs. */
@@ -8081,6 +8175,306 @@ function shiftLine(r){
     bits.push((r.total&&r.done>=r.total)?'done, never filed':'never filed');
   return bits.join(' · ');
 }
+/* ═══════ GUEST ISSUES STILL OPEN ══════════════════════════════════════
+   A guest issue logged as Pending died with the shift. The leader who logged
+   it knew about it; the leader who came in the next morning did not, and the
+   guest waited on a handoff that never happened. Stedman Ellington asked for
+   this directly: a reminder that stays alive until somebody closes it.
+
+   So a pending issue now rides on the filed record with an id, and every
+   later shift at that store reads it back out of the store's own records,
+   which is the same read the BEFORE YOU card already does. It stays on the
+   board until a leader closes it or writes what moved.
+
+   Nothing here identifies a guest. The ticket and the order number are what
+   the Guest Solutions section already captures, and no field asks for a name.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* An id is minted when the issue is saved, so a later shift can speak about
+   the same issue without matching on free text. */
+function gsId(g){
+  if(g&&!g.id) g.id='gs'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  return g?g.id:'';
+}
+function gsPendingNow(){
+  return (S.gsi||[]).filter(function(g){ return g&&g.done&&g.outcome==='Pending'; })
+    .map(function(g){
+      return {id:gsId(g), ticket:(g.ticket||''), order:(g.order||''),
+              issue:(g.issue||'').slice(0,400), action:(g.action||'').slice(0,400),
+              by:(S.header.leader||''), at:isoDate()};
+    });
+}
+/* What this shift did about issues it inherited. */
+function gsResolved(){
+  const r=S.gsres||{}, out=[];
+  Object.keys(r).forEach(function(k){
+    const v=r[k]||{};
+    if(v.state==='closed')
+      out.push({id:k, outcome:v.outcome||'', note:(v.note||'').slice(0,400),
+                by:(S.header.leader||''), at:isoDate()});
+  });
+  return out;
+}
+function gsUpdates(){
+  const r=S.gsres||{}, out=[];
+  Object.keys(r).forEach(function(k){
+    const v=r[k]||{};
+    if(v.state!=='closed' && (v.note||'').trim())
+      out.push({id:k, note:(v.note||'').slice(0,400),
+                by:(S.header.leader||''), at:isoDate()});
+  });
+  return out;
+}
+
+/* Reads the store's own records newest first and works out what is still
+   open: every pending issue, less everything a later shift closed. Driven by
+   SHIFTS, which the BEFORE YOU card already pulls, so this costs no extra
+   read and shows exactly what the rules allow and no more. */
+function openIssues(){
+  if(SHIFTS.state!=='ok') return [];
+  const rows=(SHIFTS.rows||[]).slice();
+  const closed={}, notes={}, seen={}, out=[];
+  rows.forEach(function(r){
+    (r.closedIssues||[]).forEach(function(c){ if(c&&c.id) closed[c.id]=c; });
+    (r.issueUpd||[]).forEach(function(u){
+      if(!u||!u.id) return; (notes[u.id]=notes[u.id]||[]).push(u); });
+  });
+  rows.forEach(function(r){
+    (r.openIssues||[]).forEach(function(g){
+      if(!g||!g.id||seen[g.id]) return;
+      seen[g.id]=1;
+      if(closed[g.id]) return;
+      out.push(Object.assign({}, g, {notes:(notes[g.id]||[])}));
+    });
+  });
+  /* Anything this shift has already closed on screen drops off at once. */
+  return out.filter(function(g){ return ((S.gsres||{})[g.id]||{}).state!=='closed'; });
+}
+function gsLabel(g){
+  const bits=[];
+  if(g.ticket) bits.push('Ticket '+g.ticket);
+  if(g.order) bits.push('Order '+g.order);
+  return bits.join(' · ')||'No ticket number';
+}
+function gsDays(iso){
+  if(!iso) return '';
+  const a=new Date(iso+'T00:00:00'), b=new Date(localDay()+'T00:00:00');
+  const d=Math.round((b-a)/86400000);
+  return (d<=0)?'today':(d===1?'1 day open':d+' days open');
+}
+function buildOpenIssues(){
+  if(isStoreCopy()||!FB_ON) return null;
+  const list=openIssues();
+  if(!list.length) return null;
+  const key=S.shift+'-gsopen';
+  const shut=(S.ui[key]==='shut');
+  const box=el('div','grp gsopen'+(shut?' shut':''));
+  box.appendChild(el('h2','','STILL OPEN FOR A GUEST<span>Left pending by an earlier shift'+
+    '<em data-tog="'+key+'">'+list.length+' '+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const body=el('div','gbody'), pad=el('div','numpad');
+  let h='';
+  list.forEach(function(g){
+    const cur=(S.gsres||{})[g.id]||{};
+    h+='<div class="gsrow" data-gsrow="'+escA(g.id)+'">'+
+      '<div class="gshead"><b>'+esc(gsLabel(g))+'</b><em>'+esc(gsDays(g.at))+
+        (g.by?(' · '+esc(g.by)):'')+'</em></div>';
+    if(g.issue) h+='<p class="gstxt">'+esc(g.issue)+'</p>';
+    if(g.action) h+='<p class="gstxt sub">Last action: '+esc(g.action)+'</p>';
+    (g.notes||[]).forEach(function(n){
+      h+='<p class="gstxt sub">'+esc(n.at||'')+(n.by?(' · '+esc(n.by)):'')+': '+esc(n.note||'')+'</p>';
+    });
+    h+='<textarea class="gsnote" data-gsnote="'+escA(g.id)+'" placeholder="What you did about it today…">'+
+         escA(cur.note||'')+'</textarea>'+
+       '<div class="gsbtns">'+
+         '<button type="button" class="gsb keep'+(cur.state==='open'?' on':'')+'" data-gskeep="'+escA(g.id)+'">Still open</button>'+
+         '<button type="button" class="gsb done'+(cur.outcome==='Saved'?' on':'')+'" data-gsclose="'+escA(g.id)+'" data-v="Saved">Resolved · saved</button>'+
+         '<button type="button" class="gsb done'+(cur.outcome==='Not Saved'?' on':'')+'" data-gsclose="'+escA(g.id)+'" data-v="Not Saved">Resolved · not saved</button>'+
+       '</div></div>';
+  });
+  h+='<p class="admnote">These stay here, on every shift at this store, until '+
+     'somebody resolves them. Closing one takes it off the board for everybody.</p>';
+  pad.innerHTML=h;
+  body.appendChild(pad); box.appendChild(body);
+  return box;
+}
+
+/* ═══════ CLOSING THE LOOP, AND HALFTIME ═══════════════════════════════
+   Two things Stedman Ellington asked for, built as rules over numbers the
+   board already holds rather than as anything that calls itself AI. There is
+   no model in this file and there is not going to be one, so nothing here
+   generates an opinion. It reads stated company targets, the counters the
+   leader has already tapped, and the last shift's own words, and it says
+   what they add up to.
+
+   Every threshold below is a stated 1915 South target. Where no target
+   exists, the number is shown with no verdict attached rather than scored
+   against something invented.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. WHAT YOU SAID LAST NIGHT ───────────────────────────────────────
+   A reflection written at 9pm was read by nobody and changed nothing the
+   next morning. It is the one place a leader says what they intend to do,
+   so it comes back to them at the start of the next shift with one question
+   attached: did it happen. That answer rides on today's record, so a plan
+   and its outcome finally sit in the same place. */
+function lastPlan(){
+  if(SHIFTS.state!=='ok') return null;
+  const l=lastShift();
+  if(!l||!(l.reflection||'').trim()) return null;
+  return l;
+}
+function buildPlanBack(){
+  if(isStoreCopy()||!FB_ON) return null;
+  const l=lastPlan(); if(!l) return null;
+  const key=S.shift+'-planback', shut=(S.ui[key]==='shut');
+  const cur=S.planback||{};
+  const box=el('div','grp planback'+(shut?' shut':''));
+  box.appendChild(el('h2','','SAID LAST SHIFT<span>'+
+    esc(l.shift==='CLOSING'?'Written at close':'Written at handoff')+
+    '<em data-tog="'+key+'">'+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const body=el('div','gbody'), pad=el('div','numpad');
+  let h='<div class="sub2">'+esc(prettyDay(l.date))+(l.leader?(' · '+esc(l.leader)):'')+'</div>'+
+    '<blockquote class="saidq">'+esc(l.reflection)+'</blockquote>'+
+    '<div class="sub2">Did it happen?</div>'+
+    '<div class="pbbtns">'+
+      [['yes','Yes'],['part','Partly'],['no','No']].map(function(o){
+        return '<button type="button" class="pbb'+(cur.state===o[0]?' on':'')+
+          '" data-pb="'+o[0]+'">'+o[1]+'</button>'; }).join('')+
+    '</div>'+
+    '<textarea class="pbnote" data-pbnote="1" placeholder="What carried over into today…">'+
+      escA(cur.note||'')+'</textarea>'+
+    '<p class="admnote">Your answer goes on today’s record, so the plan and what '+
+    'came of it sit together instead of in two different shifts.</p>';
+  pad.innerHTML=h;
+  body.appendChild(pad); box.appendChild(body);
+  return box;
+}
+
+/* ── 2. HALFTIME ───────────────────────────────────────────────────────
+   Halfway between the hours the leader already set for this store. Not a
+   clock invented here, and no intraday pace model either: nobody has told
+   this tool what share of a day's revenue should be written by 2pm, so it
+   does not pretend to know.
+
+   Two of the four questions Stedman listed are already tapped on the
+   consultant cards, so the board states them instead of asking again. It
+   asks only what it cannot know. */
+function halftimeMin(){
+  /* The close picker holds a PM hour (6 to 9), the open picker a morning one,
+     so the close has to be put on the same clock before they are averaged. */
+  const o=openHour(), c=closeHour()+12;
+  if(o==null||c==null||!(c>o)) return null;
+  return Math.round(((o+c)/2)*60);
+}
+function halftimeDue(){
+  const m=halftimeMin();
+  return m!=null && nowMins()>=m;
+}
+const HALF_FOCUS=[
+  {k:'Connection', beh:'Greet and discover before you present. Build a cart with every guest. '+
+     'Value in the product, in the experience and in the brand.'},
+  {k:'Finance', beh:'Buying power early, on the walk, not at the desk. '+
+     '93% of approved guests buy today and 97% inside 7 days.'},
+  {k:'Bedding', beh:'Every guest walks the mattress gallery. Start the sleep conversation '+
+     'before they ask for it.'},
+  {k:'Protection &amp; Delivery', beh:'Every option presented protected and delivered, on the floor, '+
+     'with the options calculator. Never added at the desk.'}
+];
+/* Facts, each with the stated target beside it, or with none where the
+   company has not set one. */
+function halftimeRead(){
+  const o=S[S.shift==='CLOSING'?'eod':'openm']||{};
+  const opps=parseFloat(o.opps);
+  const has=isFinite(opps)&&opps>0;
+  const n=function(k){ return engCount(k); };
+  const closes=n('close');
+  const r=storeRow();
+  const clg=r?vOf(r,'closegoal'):null;
+  const out=[];
+  out.push({lbl:'Guest opportunities', v:String(has?opps:0), tgt:'', ok:null});
+  if(has){
+    const cr=(closes/opps)*100;
+    out.push({lbl:'Close rate so far', v:cr.toFixed(1)+'%',
+      tgt:(clg!=null)?('budget '+clg.toFixed(1)+'%'):'no budget close rate loaded',
+      ok:(clg!=null)?(cr>=clg):null});
+    const fa=(n('finapp')/opps)*100;
+    out.push({lbl:'Finance apps', v:n('finapp')+' · '+fa.toFixed(1)+'% of traffic',
+      tgt:'target 10% of traffic', ok:fa>=10});
+  } else {
+    out.push({lbl:'Finance apps', v:String(n('finapp')),
+      tgt:'count the opportunities to rate it', ok:null});
+  }
+  if(closes>0){
+    const pa=(n('protsold')/closes)*100;
+    out.push({lbl:'Protection sold', v:n('protsold')+' · '+pa.toFixed(0)+'% of closes',
+      tgt:'target 60% attachment', ok:pa>=60});
+  } else {
+    out.push({lbl:'Protection sold', v:String(n('protsold')), tgt:'nothing closed yet', ok:null});
+  }
+  /* No company bedding attachment target has been set, so this one is
+     reported and not judged. */
+  out.push({lbl:'Bedding sold', v:n('bedsold')+' sold · '+n('bedconv')+' offered',
+    tgt:'no company attachment target', ok:null});
+  const crew=crewRows();
+  if(crew.length){
+    const touched=crew.filter(function(c){ return engFor(c.name,'assoc')>0; }).length;
+    out.push({lbl:'Consultants coached', v:touched+' of '+crew.length,
+      tgt:'the standard is every one of them', ok:touched>=crew.length});
+  }
+  return out;
+}
+/* The one the board is furthest from, so the suggestion is sourced too. */
+function halftimeSuggest(){
+  const rows=halftimeRead();
+  const miss=rows.filter(function(x){ return x.ok===false; });
+  if(!miss.length) return '';
+  const l=miss[0].lbl;
+  if(/Close rate/.test(l)) return 'Connection';
+  if(/Finance/.test(l)) return 'Finance';
+  if(/Protection/.test(l)) return 'Protection &amp; Delivery';
+  if(/Consultants/.test(l)) return 'Connection';
+  return '';
+}
+function buildHalftime(){
+  if(!S.shift||!halftimeDue()) return null;
+  const key=S.shift+'-half', shut=(S.ui[key]==='shut');
+  const h2=S.half||{};
+  const sug=halftimeSuggest();
+  const box=el('div','grp half'+(shut?' shut':''));
+  box.appendChild(el('h2','','HALFTIME<span>Where the floor stands, and what you run next'+
+    '<em data-tog="'+key+'">'+(shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const body=el('div','gbody'), pad=el('div','numpad');
+  let h='<div class="hfgrid">'+halftimeRead().map(function(x){
+    return '<div class="hfrow'+(x.ok===false?' bad':(x.ok===true?' good':''))+'">'+
+      '<span>'+esc(x.lbl)+'</span><b>'+esc(x.v)+'</b>'+
+      (x.tgt?'<i>'+esc(x.tgt)+'</i>':'')+'</div>';
+  }).join('')+'</div>';
+  h+='<p class="admnote">Bedding and finance are read back from your consultant cards, '+
+     'so you are not typing them twice. Every target named here is a company target.</p>';
+  h+='<div class="sub2">Phone calls made so far<em>the board cannot see these</em></div>'+
+     '<div class="ctiles one"><div class="ctile"><label>Calls</label><div class="crow">'+
+     '<button type="button" class="cminus" data-hfc="-1">−</button>'+
+     '<b>'+(parseInt(h2.calls,10)||0)+'</b>'+
+     '<button type="button" class="cplus" data-hfc="1">+</button>'+
+     '</div></div></div>';
+  h+='<div class="sub2">Your focus for the back half'+
+     (sug?'<em>furthest from target right now: '+sug+'</em>':'')+'</div>'+
+     '<div class="hfbtns">'+HALF_FOCUS.map(function(f){
+       return '<button type="button" class="hfb'+(h2.focus===f.k?' on':'')+
+         (( !h2.focus && sug===f.k)?' sug':'')+'" data-hff="'+escA(f.k)+'">'+f.k+'</button>';
+     }).join('')+'</div>';
+  const pick=HALF_FOCUS.filter(function(f){ return f.k===h2.focus; })[0];
+  if(pick) h+='<div class="hfbeh"><b>Coach this, for the rest of the shift.</b> '+pick.beh+
+    '</div><div class="tagrow"><span class="tag">Core 4 · '+pick.k+'</span></div>';
+  h+='<textarea class="hfnote" id="hfnote" data-hfn="1" placeholder="What you are running in the huddle…">'+
+     escA(h2.note||'')+'</textarea>'+
+     '<div class="dictrow"><button type="button" class="mic" data-dict="#hfnote">🎤</button>'+
+     '<span class="dicthint">the huddle</span></div>';
+  pad.innerHTML=h;
+  body.appendChild(pad); box.appendChild(body);
+  return box;
+}
+
 function buildShifts(){
   if(isStoreCopy()||!FB_ON) return null;
   if(SHIFTS.state==='none'||SHIFTS.state==='') return null;
@@ -8305,6 +8699,20 @@ function summaryOf(snap){
              "Burlington", not numbers. Written as an id a market leader would
              open the board and see nothing. The number and the folder name
              ride alongside for everything else. */
+          /* A pending guest issue outlives the shift that logged it, so it
+             travels on the record and every later shift at this store reads it
+             back until somebody closes it. */
+          /* The leader's own words, so the next shift can be asked whether
+             what they planned actually happened. */
+          reflection:String(S.reflect||'').trim().slice(0,600),
+          halftime:(S.half&&(S.half.focus||S.half.note||S.half.calls))
+            ? {calls:parseInt(S.half.calls,10)||0, focus:S.half.focus||'',
+               note:String(S.half.note||'').slice(0,400)} : null,
+          saidLast:(S.planback&&(S.planback.state||S.planback.note))
+            ? {state:S.planback.state||'', note:String(S.planback.note||'').slice(0,400)} : null,
+          openIssues:gsPendingNow(),
+          closedIssues:gsResolved(),
+          issueUpd:gsUpdates(),
           store:storeShort(),
           storeId:storeParts().code||'',
           storeFolder:storeParts().folder, storeLabel:myStore(),
