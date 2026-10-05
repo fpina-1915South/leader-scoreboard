@@ -847,6 +847,16 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .glist{margin:2px 0 10px;padding-left:20px;}
 .glist li{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
+.nowblk.file{background:#FBEDE8;border:1px solid #E9BFAE;}
+.nowblk.file h4{color:var(--flag);}
+.nowblk.file.amb{background:#FDF3E3;border-color:#EBD3A6;}
+.nowblk.file.amb h4{color:#8A5A14;}
+.nowblk.file p{margin:0 0 8px;}
+.filebtn{display:block;width:100%;min-height:52px;border:0;border-radius:10px;
+  background:var(--flag);color:#fff;font:700 16px/1.2 inherit;letter-spacing:.3px;
+  -webkit-appearance:none;cursor:pointer;}
+.nowblk.file.amb .filebtn{background:#8A5A14;}
+.filebtn:active{filter:brightness(.92);}
 .nowblk.leftb{background:var(--ice);border:1px solid #BFD9E3;border-radius:10px;padding:9px 10px 7px;margin-top:8px;}
 .nowblk.leftb h4{color:var(--navy);margin:0 0 6px;font-size:12px;letter-spacing:.4px;text-transform:uppercase;}
 .nowrow.lf{display:flex;align-items:center;justify-content:space-between;width:100%;
@@ -870,6 +880,20 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   letter-spacing:.3px;padding-left:10px;white-space:nowrap;}
 .grp.cash h2{background:#244A58;}
 .grp.cash.needs h2{background:var(--orange);}
+.grp.shifts h2{background:var(--blue);}
+.lastshift{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfcfd;}
+.lastshift.warn{border-color:var(--orange);background:#fff8f0;}
+.lastshift b{font-size:15px;color:var(--navy);}
+.lastshift p{margin:6px 0 0;font-size:13px;color:#6b7a80;}
+.shlist{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.shrow{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff;}
+.shrow.warn{border-color:var(--orange);}
+.shrow span{display:flex;flex-direction:column;min-width:0;}
+.shrow b{font-size:14px;color:var(--navy);}
+.shrow em{font-style:normal;font-size:12px;color:#6b7a80;}
+.shrow i{font-style:normal;font-size:12px;color:#56656b;text-align:right;flex:0 0 auto;}
+
 .row.cashrow .ck.go{background:var(--icy);border-color:var(--blue);color:var(--navy);
   font-weight:800;font-size:13px;letter-spacing:.02em;width:auto;padding:0 12px;}
 .row.cashrow.ok .ck.go{background:var(--navy);border-color:var(--navy);color:#fff;}
@@ -1403,6 +1427,7 @@ function render(){
     host.appendChild(coach);
     host.appendChild(buildEngagement());
   }
+  const sh=buildShifts(); if(sh) host.appendChild(sh);
   host.appendChild(buildCash());
   if(S.shift==='OPENING') host.appendChild(buildOpeningMetrics());
   if(S.shift==='CLOSING') host.appendChild(buildEOD());
@@ -1991,7 +2016,7 @@ function cashAmWord(r){
   return 'no morning count on this tablet, type it';
 }
 /* ── PAINTING THE CASH NUMBERS WITHOUT REBUILDING THE SCREEN ───────────
-   Khoury at Yulee, first night on it: "counting the cash drawer loses the
+   A pilot GM, first night on it: "counting the cash drawer loses the
    keyboard on ipad for every number put in". Every keystroke was calling
    render(), which rebuilds the page, which destroys the input the leader is
    typing into, which closes the iPad keyboard. Eleven denominations, and the
@@ -5357,6 +5382,62 @@ function leftBlock(){
   return h;
 }
 
+/* ── FINISHED IS NOT FILED ─────────────────────────────────────────────
+   Sixteen of twenty two records sat in-progress, and one of them was Macon
+   at 29 of 29. That leader worked the whole shift, ticked the last box, read
+   "Nothing outstanding. The rest of the shift is the floor", and went back to
+   the floor. Nobody above the store ever saw any of it.
+
+   The copy was the bug. A finished list is not a filed shift, and the board
+   was the only thing that knew the difference and the only thing not saying
+   so. So the done state reads as unfinished until it is filed, it says what
+   filing is for, and the button sits on the card a leader is already looking
+   at rather than at the bottom of a page they have stopped scrolling.
+   ──────────────────────────────────────────────────────────────────────── */
+function filedState(){
+  if(!S.shift||typeof SYNC==='undefined') return '';
+  if(SYNC.submitted&&!SYNC.dirty) return 'filed';
+  if(SYNC.submitted) return 'changed';
+  const t=totals();
+  return (t.total&&t.done>=t.total)?'ready':'open';
+}
+/* Late in the shift, measured by the board's own last timed group rather than
+   an hour invented here. */
+function lastDueMin(){
+  const d=dueGroups();
+  return d.length?d[d.length-1].at:-1;
+}
+function windingDown(){
+  const last=lastDueMin();
+  return last>=0 && nowMins()>=last;
+}
+function fileBlock(){
+  const st=filedState();
+  if(st===''||st==='filed') return '';
+  if(st==='open'&&!windingDown()) return '';
+  const t=totals(), short=Math.max(0,(t.total||0)-(t.done||0));
+  let head,body,btn;
+  if(st==='changed'){
+    head='Changed since you filed';
+    body='You filed at '+esc(SYNC.at||'')+' and something has changed since. '+
+         'Send it again so the record matches the shift.';
+    btn='✓ Submit the update';
+  } else if(st==='ready'){
+    head='Done, not filed';
+    body='Your list is finished. Nobody above this store can see any of it '+
+         'until you file it.';
+    btn='✓ File this shift';
+  } else {
+    head='Not filed yet';
+    body='Your shift is nearly over and this has not gone in. '+short+
+         ' still open. You can file it short, it goes in marked short.';
+    btn='✓ Review and file';
+  }
+  return '<div class="nowblk file'+(st==='changed'?' amb':'')+'">'+
+    '<h4>'+head+'</h4><p>'+body+'</p>'+
+    '<button type="button" class="filebtn" onclick="submitDay()">'+btn+'</button></div>';
+}
+
 function buildNow(){
   if(!S.shift) return null;
   const list=dueGroups();
@@ -5372,19 +5453,25 @@ function buildNow(){
   let h='';
 
   /* Overdue first, because that is the only thing on this card a leader has
-     to act on before anything else. */
+     to act on before anything else. The filing nudge comes straight after it,
+     and takes the place of the reassuring line when the shift is not in yet. */
+  const fb=fileBlock();
   if(late.length){
     h+='<div class="nowblk late"><h4>'+late.length+' past due</h4>'+
       late.map(function(g){
         return '<button type="button" class="nowrow" data-jump="'+g.gi+'">'+
           '<time>'+esc(hm(g.at))+'</time><span>'+esc(g.title.replace(/^\d{1,2}:\d{2}\s*[·-]?\s*/,''))+
           '</span><i>'+g.done+'/'+g.total+'</i></button>'; }).join('')+'</div>';
-  } else if(t.total&&t.done>=t.total){
-    h+='<div class="nowblk ok"><h4>List is done</h4>'+
-       '<p>Nothing outstanding. The rest of the shift is the floor.</p></div>';
-  } else {
-    h+='<div class="nowblk ok"><h4>Nothing past due</h4></div>';
+  } else if(!fb){
+    if(t.total&&t.done>=t.total){
+      h+='<div class="nowblk ok"><h4>Done and filed</h4>'+
+         '<p>Everything ticked and the shift is in'+
+         (SYNC.at?(', filed '+esc(SYNC.at)):'')+'. The rest of the shift is the floor.</p></div>';
+    } else {
+      h+='<div class="nowblk ok"><h4>Nothing past due</h4></div>';
+    }
   }
+  h+=fb;
   /* Named and reachable, always, whether anything is late or not. */
   if(t.total&&t.done<t.total) h+=leftBlock();
 
@@ -6274,6 +6361,7 @@ document.getElementById('store').addEventListener('change',e=>{
   render();   /* the numbers, coaching and crew panels are store specific */
   cloudPull();   /* a different store is a different set of numbers */
   SCHLOAD={state:'',code:'',msg:''}; SCHED=null; schedSave(); schedPull();
+  SHIFTS={state:'',store:'',rows:[],msg:''}; shiftsPull();
 });
 /* When the leader leaves a cash field the screen catches up properly: the
    typed morning count becomes a value, the group settles, the shift total is
@@ -7199,6 +7287,10 @@ async function submitDay(){
   SYNC.inflight=false;
   SYNC.quiet=true; save(); SYNC.quiet=false;
   updateProg();
+  /* The RIGHT NOW card is carrying the nudge, so it has to be redrawn here or
+     a leader who just filed is still being told to file. Safe to render on
+     this path: a submit tap means nothing is focused. */
+  if(typeof render==='function') render();
 }
 
 /* ═════════ FIREBASE ═══════════════════════════════════════════════════
@@ -7579,6 +7671,7 @@ async function cloudPull(force){
     dataSave(); histSave();
     CLOUD={state:'ok',code:code,day:got.day,built:got.built,msg:''};
     schedPull(true);                        /* the day's schedule, same trip */
+    shiftsPull(true);                       /* and what this store already filed */
     LEADER_SIG=null;                      /* the leader list came with the data */
     renderLeaderField();
     render();
@@ -7892,6 +7985,143 @@ async function ssPush(onStep){
   SSRUN={state:'done', msg:ok+' of '+codes.length+' stores written', rows:rows, missing:missing};
   if(onStep) onStep();
   return SSRUN;
+}
+
+/* ═══════ WHAT THIS STORE HAS ALREADY FILED ════════════════════════════
+   A leader opens the board with no idea what the last shift left them. The
+   closer's note, what got flagged, what went in short: all of it was written
+   down and then only ever read by somebody else.
+
+   So the store reads its own shifts back. The opener sees last night's close,
+   the closer sees this morning, and anybody can look back through the week.
+
+   It is scoped by the rules, not by the page. A signed-in leader can read the
+   records whose store matches their line in storemap, and nothing else, so
+   this shows what it is allowed to show and no more. Houma and anybody not in
+   the lookup simply get nothing, which is the safe way round.
+   ──────────────────────────────────────────────────────────────────────── */
+var SHIFTS={state:'', store:'', rows:[], msg:''};
+
+/* Equality on store plus ordering by document id, which embeds the date, so
+   newest comes back first with no composite index to maintain. */
+async function fbStoreRecords(storeName,limit){
+  const tok=await fbToken();
+  const url='https://firestore.googleapis.com/v1/projects/'+FB_CFG.projectId+
+            '/databases/(default)/documents:runQuery';
+  const body={structuredQuery:{
+    from:[{collectionId:'records'}],
+    where:{fieldFilter:{field:{fieldPath:'store'},op:'EQUAL',
+           value:{stringValue:String(storeName||'')}}},
+    orderBy:[{field:{fieldPath:'__name__'},direction:'DESCENDING'}],
+    limit:limit||14}};
+  const r=await fetch(url,{method:'POST',
+    headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},
+    body:JSON.stringify(body)});
+  if(r.status===403) throw new Error('not allowed');
+  if(!r.ok) throw new Error('Firestore '+r.status);
+  const j=await r.json();
+  return (j||[]).filter(function(x){ return x.document; }).map(function(x){
+    const f=x.document.fields||{}, o={};
+    Object.keys(f).forEach(function(k){ o[k]=fbDeep(f[k]); });
+    o.__id=String(x.document.name).split('/').pop();
+    return o;
+  });
+}
+let SH_BUSY=false;
+async function shiftsPull(force){
+  if(isStoreCopy()||!FB_ON||!signedIn()) return;
+  const st=storeShort(); if(!st) return;
+  if(!force && SHIFTS.state==='ok' && SHIFTS.store===st) return;
+  if(SH_BUSY) return;
+  SH_BUSY=true;
+  SHIFTS={state:'load', store:st, rows:[], msg:''};
+  try{
+    const rows=await fbStoreRecords(st,14);
+    SHIFTS={state:'ok', store:st, rows:rows, msg:''};
+  }catch(e){
+    /* Not being allowed to read is not an error a leader should see as a
+       failure. It just means nobody has given this address a store yet. */
+    SHIFTS={state:(/not allowed/.test(String(e.message))?'none':'err'),
+            store:st, rows:[], msg:String(e.message||e).slice(0,80)};
+  }
+  SH_BUSY=false;
+  render();
+}
+
+/* Today's date as the board counts it, so "last night" means the shift before
+   this one rather than the previous calendar entry. */
+function shiftWhen(id){
+  const m=String(id||'').match(/_(\d{4}-\d{2}-\d{2})_([A-Z]+)$/);
+  return m?{date:m[1], shift:m[2]}:{date:'', shift:''};
+}
+function shiftRows(){
+  return (SHIFTS.rows||[]).map(function(r){
+    const w=shiftWhen(r.__id);
+    return {id:r.__id, date:w.date||r.date||'', shift:w.shift||r.shift||'',
+            leader:r.leader||'', done:r.done, total:r.total,
+            status:r.status||'', flags:r.flagCount||0,
+            short:r.shortBy||0, open:r.openItems||[],
+            handoff:r.handoff||'', worked:r.worked||0, scheduled:r.scheduled||0};
+  }).filter(function(r){ return r.date; });
+}
+/* The one a leader actually wants: the shift immediately before theirs. */
+function lastShift(){
+  const rows=shiftRows(), today=localDay();
+  const mine=(S.shift==='CLOSING')?'OPENING':'CLOSING';
+  const sameDay=rows.filter(function(r){ return r.date===today && r.shift===mine; })[0];
+  if(sameDay) return sameDay;
+  return rows.filter(function(r){ return r.date<today || (r.date===today&&r.shift!==S.shift); })[0]||null;
+}
+function shiftLine(r){
+  const bits=[];
+  if(r.done!=null&&r.total) bits.push(r.done+' of '+r.total);
+  if(r.flags) bits.push(r.flags+' flagged');
+  if(r.short) bits.push(r.short+' not done');
+  if(r.status==='in-progress')
+    bits.push((r.total&&r.done>=r.total)?'done, never filed':'never filed');
+  return bits.join(' · ');
+}
+function buildShifts(){
+  if(isStoreCopy()||!FB_ON) return null;
+  if(SHIFTS.state==='none'||SHIFTS.state==='') return null;
+  const rows=shiftRows();
+  const key=S.shift+'-shifts';
+  const shut=(S.ui[key]!=='open');            /* folded unless asked for */
+  const box=el('div','grp shifts'+(shut?' shut':''));
+  const last=lastShift();
+  box.appendChild(el('h2','','BEFORE YOU<span>What this store already filed'+
+    '<em data-tog="'+key+'">'+(rows.length?rows.length+' on file ':'')+
+    (shut?'&#9656;':'&#9662;')+'</em></span>'));
+  const body=el('div','gbody'), pad=el('div','numpad');
+  let h='';
+  if(SHIFTS.state==='load'){ h+='<p class="admnote">Reading what this store filed…</p>'; }
+  else if(SHIFTS.state==='err'){ h+='<p class="admnote bad">Could not read this store’s shifts. '+esc(SHIFTS.msg)+'</p>'; }
+  else if(!rows.length){ h+='<p class="admnote">Nothing filed for this store yet.</p>'; }
+  else {
+    if(last){
+      h+='<div class="sub2">'+(last.shift==='CLOSING'?'Last night’s close':'This morning’s open')+
+         '<em>'+esc(prettyDay(last.date))+(last.leader?' · '+esc(last.leader):'')+'</em></div>';
+      h+='<div class="lastshift'+(last.status==='in-progress'?' warn':'')+'">'+
+         '<b>'+esc(shiftLine(last)||'filed')+'</b>';
+      if(last.open&&last.open.length) h+='<p>Left open: '+
+        esc(last.open.slice(0,4).join('; '))+(last.open.length>4?(' and '+(last.open.length-4)+' more'):'')+'</p>';
+      h+='</div>';
+    }
+    h+='<div class="sub2">Back through the week</div>';
+    h+='<div class="shlist">'+rows.map(function(r){
+      return '<div class="shrow'+(r.status==='in-progress'?' warn':'')+'">'+
+        '<span><b>'+esc(prettyDay(r.date))+' '+esc(r.shift==='CLOSING'?'close':'open')+'</b>'+
+        '<em>'+esc(r.leader||'no leader named')+'</em></span>'+
+        '<i>'+esc(shiftLine(r)||'—')+'</i></div>';
+    }).join('')+'</div>';
+    if(rows.some(function(r){ return r.status==='in-progress'; }))
+      h+='<p class="admnote">A shift marked <b>never filed</b> was worked but never submitted, '+
+         'so nobody above the store has seen it. <b>Done, never filed</b> means the whole list '+
+         'was ticked and the leader walked away without sending it.</p>';
+  }
+  pad.innerHTML=h;
+  body.appendChild(pad); box.appendChild(body);
+  return box;
 }
 
 /* ── One shift, one document, however many tablets ─────────────────────── */
@@ -8267,6 +8497,7 @@ async function signGo(mode){
     syncLabel(); updateProg();
     cloudPull(true);   /* the numbers were waiting on this */
     schedPull(true);
+    shiftsPull(true);
     if(S.shift && totals().done) checkpoint();
   }catch(e){ err.textContent=e.message||'Could not sign in.'; }
   btn.disabled=false; if(other) other.disabled=false;
@@ -8353,7 +8584,7 @@ document.addEventListener('visibilitychange',function(){
 /* ───────── INIT ───────── */
 buildStores(); buildDates(); srcLoad(); dataLoad(); oneLoad(); histLoad(); authLoad(); schedLoad(); sslLoad();
 restore(); if(S.shift) metSeed(); render(); photoLoad(); signWire(); whoLabel(); syncLabel();
-cloudBand(); cloudPull(); schedPull();
+cloudBand(); cloudPull(); schedPull(); shiftsPull();
 gearPaint();
 /* Nothing is asked of a leader until they have actually started a shift, and
    never more than once, because a sign-in box in front of the checklist every
