@@ -857,19 +857,24 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .glist{margin:2px 0 10px;padding-left:20px;}
 .glist li{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
+.onebtn.held{background:#fff;border:1px solid var(--line);color:var(--ink);}
 .onebtns{display:flex;gap:8px;}
 .oneback{flex:0 0 34%;min-height:52px;border:1px solid var(--line);border-radius:10px;
   background:#fff;font:600 15px/1.1 inherit;color:var(--ink);-webkit-appearance:none;cursor:pointer;}
 .onebtns .onesave{flex:1;}
-.scgrid{display:flex;flex-direction:column;gap:4px;margin:2px 0 12px;}
-.scrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 10px;
+/* The parked thirteen-row card. These used to be called scgrid and scrow,
+   which are both already taken by the consultant card tiles and the leader
+   scoreboard rows, and being later in the sheet they quietly overrode both.
+   Namespaced so reviving the panel cannot do that again. */
+.sc13grid{display:flex;flex-direction:column;gap:4px;margin:2px 0 12px;}
+.sc13row{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 10px;
   padding:8px 10px;border-radius:8px;background:#F4F7F7;border:1px solid var(--line);}
-.scrow span{font-size:13px;color:var(--ink);}
-.scrow b{font-size:15px;white-space:nowrap;text-align:right;}
-.scrow i{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--muted);}
-.scrow.ok{background:#E6F4EC;border-color:#BBDFCB;}
-.scrow.warn{background:#FDF3E3;border-color:#EBD3A6;}
-.scrow.bad{background:#FBEDE8;border-color:#E9BFAE;}
+.sc13row span{font-size:13px;color:var(--ink);}
+.sc13row b{font-size:15px;white-space:nowrap;text-align:right;}
+.sc13row i{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--muted);}
+.sc13row.ok{background:#E6F4EC;border-color:#BBDFCB;}
+.sc13row.warn{background:#FDF3E3;border-color:#EBD3A6;}
+.sc13row.bad{background:#FBEDE8;border-color:#E9BFAE;}
 .grp.gsopen h2{background:#7A3B16;}
 .grp.planback h2{background:var(--navy2);}
 .grp.half h2{background:var(--navy);}
@@ -4364,6 +4369,10 @@ function oneDueLine(crew){
    else from that shift. There is no print. Frank's call: it goes up, it
    does not go on paper.
    ──────────────────────────────────────────────────────────────────────── */
+/* PARKED: built for the in-board 1-on-1, which moved to the Consultant
+   Scorecard. Nothing calls these now. Kept because the Scorecard side of
+   the work wants the same thirteen rows and the same goals, and because
+   deleting and rewriting it would be the third version of the same list. */
 const SC_PCT={margin:1,finpct:1,bedpct:1,protpct:1,delpct:1,cancelpct:1,discpct:1};
 function scNum(c,k){
   const v=SC_PCT[k]?pctNum(c[k]):num(c[k]);
@@ -4412,10 +4421,10 @@ function scCard(c){
 function scGrid(c){
   const rows=scCard(c), per=PERIODS.filter(function(p){ return p[0]===curPeriod(); })[0];
   const miss=rows.filter(function(x){ return x.v==null; }).length;
-  let h='<div class="sub3">The scorecard<em>'+esc(per?per[1]:'')+'</em></div><div class="scgrid">';
+  let h='<div class="sub3">The scorecard<em>'+esc(per?per[1]:'')+'</em></div><div class="sc13grid">';
   rows.forEach(function(x){
     const unscored=(x.per==='month'&&!scMonthOk());
-    h+='<div class="scrow'+(x.status?' '+x.status:'')+'">'+
+    h+='<div class="sc13row'+(x.status?' '+x.status:'')+'">'+
        '<span>'+esc(x.lbl)+'</span><b>'+esc(x.txt)+'</b>'+
        '<i>'+(x.goalTxt
           ? (unscored?('goal '+esc(x.goalTxt)+' a month')
@@ -4437,66 +4446,33 @@ function scSnapshot(name){
     .map(function(x){ return {k:x.k, lbl:x.lbl, v:x.txt, goal:x.goalTxt, status:x.status}; });
 }
 
+/* ── THE 1-ON-1 LIVES IN THE SCORECARD ────────────────────────────────
+   Built here first, then Frank's call: the weekly sit-down belongs in the
+   Consultant Scorecard, where the consultant can sign in and read their own
+   card, and it should not be shown on this board at all. So the panel is
+   gone. What is left is the prompt and the door.
+
+   The Scorecard already reads store, c and back off its URL, so the leader
+   lands on the right person at the right store and has a way back here.
+   ──────────────────────────────────────────────────────────────────────── */
+function scorecardLink(nm){
+  return SCORECARD_URL+'?store='+encodeURIComponent(storeShort()||'')+
+    '&c='+encodeURIComponent(nm||'')+
+    '&back='+encodeURIComponent(location.href.split('#')[0]);
+}
 function buildOneOnOne(c,coach){
-  const nm=c.name, id=flyKey(nm), open=(S.ui['one-'+id]==='open');
-  const d=oneoneDaysAgo(nm), due=oneDue(nm), rec=oneRec(nm)||{};
-  const draft=(S.one&&S.one[nm])||{};
-  let h='<div class="onerow'+(due?' due':'')+'">'+
+  const nm=c.name;
+  const d=oneoneDaysAgo(nm), due=oneDue(nm);
+  return '<div class="onerow'+(due?' due':'')+'">'+
     '<span class="onest">'+(d==null?'No 1-on-1 on record'
       :d===0?'1-on-1 held today':'Last 1-on-1 '+d+' day'+(d===1?'':'s')+' ago')+'</span>'+
-    '<a class="onebtn card" href="'+SCORECARD_URL+'" target="_blank" rel="noopener">Coach in Scorecard &#8599;</a>'+
-    '<button type="button" class="onebtn'+(due?' due':'')+'" data-one="'+escA(nm)+'">'+
-    (open?'Close':'Log it here')+'</button></div>';
-  if(!open) return h;
-  const mets=goalMetrics(c);
-  const g=draft.goals||rec.goals||[{},{}];
-  h+='<div class="onepad">';
-  /* The weekly sit-down opens on the rolling number, then the card itself,
-     because the review is the card. */
-  h+=rollLine(nm);
-  h+=scGrid(c);
-  h+='<div class="sub3">Celebrate</div>'+
-     '<textarea class="onein" id="ow-'+id+'" data-one1="wins" data-who="'+escA(nm)+'" '+
-     'placeholder="What they did well, in your words">'+escA(draft.wins!=null?draft.wins:(rec.wins||cap(coach.win||'')))+'</textarea>'+
-     dictRow('#ow-'+id);
-  h+='<div class="sub3">Opportunities, no more than two</div>'+
-     '<textarea class="onein" id="oo-'+id+'" data-one1="opps" data-who="'+escA(nm)+'" '+
-     'placeholder="The one or two things to work on">'+escA(draft.opps!=null?draft.opps:(rec.opps||cap(coach.opp||'')))+'</textarea>'+
-     dictRow('#oo-'+id);
-  h+='<div class="sub3">Goals · X to Y, by when, and how</div>';
-  [0,1].forEach(function(i){
-    const gg=g[i]||{};
-    h+='<div class="goalbox"><div class="goalgrid">'+
-       '<div class="gf"><label>Metric</label><select data-goal="'+i+'" data-gk="metric" data-who="'+escA(nm)+'">'+
-         '<option value="">Pick one…</option>'+
-         mets.map(m=>'<option value="'+escA(m[0])+'"'+(gg.metric===m[0]?' selected':'')+'>'+esc(m[0])+'</option>').join('')+
-       '</select></div>'+
-       '<div class="gf"><label>From (X)</label><input data-goal="'+i+'" data-gk="from" data-who="'+escA(nm)+
-         '" value="'+escA(gg.from||(gg.metric?(mets.find(m=>m[0]===gg.metric)||['',''])[1]:''))+'" placeholder="today"></div>'+
-       '<div class="gf"><label>To (Y)</label><input data-goal="'+i+'" data-gk="to" data-who="'+escA(nm)+
-         '" value="'+escA(gg.to)+'" placeholder="target"></div>'+
-       '<div class="gf"><label>By when</label><input type="date" data-goal="'+i+'" data-gk="by" data-who="'+escA(nm)+
-         '" value="'+escA(gg.by)+'"></div>'+
-       '</div>'+
-       '<textarea class="onein" id="gh-'+id+'-'+i+'" data-goal="'+i+'" data-gk="how" data-who="'+escA(nm)+
-         '" placeholder="How. The behavior that gets them there, not the number again.">'+escA(gg.how)+'</textarea>'+
-       dictRow('#gh-'+id+'-'+i)+'</div>';
-  });
-  h+='<p class="briefsrc" style="margin:0 0 10px">Saved here and sent up with this shift, '+
-     'so your market leader reads the review the next morning. '+esc(nm.split(',')[0])+
-     ' can still sign in to the Scorecard to see their own card.</p>'+
-     '<div class="onebtns">'+
-       /* Thirteen metrics, two write-ups and two goal boxes above this, so the
-          only way out used to be a long scroll back to the toggle at the top.
-          Back is here, and it costs nothing: every field writes as it is typed. */
-       '<button type="button" class="oneback" data-one="'+escA(nm)+'">\u2190 Back</button>'+
-       '<button type="button" class="onesave" data-onesave="'+escA(nm)+'">Save the 1-on-1</button>'+
-     '</div>'+
-     '<p class="clater">Back keeps everything you have typed. Nothing is lost.</p>';
-  if(rec.date) h+='<p class="briefsrc">Last saved '+esc(fmtMDY(rec.date))+
-    (rec.by?' by '+esc(rec.by):'')+'.</p>';
-  h+='</div>';
-  return h;
+    '<a class="onebtn card'+(due?' due':'')+'" href="'+escA(scorecardLink(nm))+
+      '" target="_blank" rel="noopener">Coach in Scorecard &#8599;</a>'+
+    /* Not the review, just the date, so the board can still say who is due
+       and stop saying it once the sit-down has happened. */
+    '<button type="button" class="onebtn held" data-oneheld="'+escA(nm)+'">'+
+      (d===0?'\u2713 Held today':'Mark held')+'</button>'+
+    '</div>';
 }
 function dictRow(sel){
   return '<div class="dictrow"><button type="button" class="mic" data-dict="'+sel+'">🎤 Dictate</button>'+
@@ -6346,26 +6322,13 @@ document.addEventListener('click',e=>{
   if(t.dataset.mc){ const sc=t.dataset.mc, k=t.dataset.k;
     const v=Math.max(0,(parseInt(S[sc][k],10)||0)+(+t.dataset.d));
     S[sc][k]=String(v); render(); save(); return; }
+  if(t.dataset.oneheld){ const nm=t.dataset.oneheld;
+    ONE[oneKey(nm)]={date:localDay(), by:(S.header.leader||'')};
+    oneSave(); render(); save();
+    toast(nm.split(',')[0]+': 1-on-1 marked held. Coach it in the Scorecard.');
+    return; }
   if(t.dataset.one){ const k='one-'+flyKey(t.dataset.one);
     S.ui[k]=(S.ui[k]==='open')?'':'open'; render(); save(); return; }
-  if(t.dataset.onesave){ const nm=t.dataset.onesave;
-    /* Read the live fields, not just what was typed into. Celebrate, the
-       opportunities and the From value all arrive prefilled, and a leader
-       who agrees with them and changes nothing still means them. */
-    const pad=t.parentNode;
-    const vOf=sel=>{ const e=pad.querySelector(sel); return e?e.value.trim():''; };
-    const goals=[0,1].map(function(i){
-      const g={};
-      ['metric','from','to','by','how'].forEach(function(k){
-        const e=pad.querySelector('[data-goal="'+i+'"][data-gk="'+k+'"]');
-        if(e) g[k]=e.value.trim();
-      });
-      return g;
-    }).filter(g=>g.metric||g.to||g.how);
-    ONE[oneKey(nm)]={date:localDay(), by:(S.header.leader||'').trim(),
-      wins:vOf('[data-one1="wins"]'), opps:vOf('[data-one1="opps"]'), goals:goals};
-    oneSave(); S.ui['one-'+flyKey(nm)]=''; if(S.one) delete S.one[nm];
-    render(); save(); toast('1-on-1 saved for '+nm); return; }
   if(t.dataset.beh){ const k=t.dataset.beh, who=t.dataset.who;
     /* Internal P2I is the coaching touch, so it asks what was coached. The
        observed selling behaviours are things the leader saw, not things they
@@ -6380,15 +6343,15 @@ document.addEventListener('click',e=>{
     Object.keys(S.ui).forEach(function(k){ if(k.indexOf('aor-')===0) S.ui[k]=''; });
     S.ui['aor-'+t.dataset.aoropen]='open'; render(); save(); return; }
   if(t.dataset.onego){
-    const nm=t.dataset.onego, id=flyKey(nm), ck='card-'+id;
-    S.ui[ck]='open'; S.ui['one-'+id]='open';
+    /* The sit-down happens in the Scorecard now, so Start opens it on that
+       person. The card is opened too, so when they come back they are
+       already looking at who they just coached. */
+    const nm=t.dataset.onego, id=flyKey(nm);
+    S.ui['card-'+id]='open';
     if(ninjaOn()) S.ui.ninja='off';
     if(S.ui[S.shift+'-roster']==='shut') S.ui[S.shift+'-roster']='';
     render(); save();
-    setTimeout(function(){
-      const e=document.querySelector('[data-onesave="'+nm.replace(/"/g,'\\"')+'"]');
-      if(e){ e.scrollIntoView({block:'center'}); window.scrollBy(0,-110); }
-    },70);
+    window.open(scorecardLink(nm),'_blank','noopener');
     return; }
   if(t.dataset.goto){ gotoSel(t.dataset.goto); return; }
   if(t.dataset.jump!=null){ const gi=+t.dataset.jump;
@@ -6592,8 +6555,7 @@ document.addEventListener('input',e=>{
   else if(t.dataset.ex!=null)S.ex[t.dataset.ex]=t.value;
   else if(t.dataset.note!=null)S.aor[t.dataset.note].note=t.value;
   else if(t.dataset.imp!=null){S.impact[t.dataset.imp]=t.value;updateProg();}
-  else if(t.dataset.one1!=null){ const w=t.dataset.who;
-    S.one[w]=S.one[w]||{}; S.one[w][t.dataset.one1]=t.value; }
+
   else if(t.dataset.gk!=null){ const w=t.dataset.who, i=+t.dataset.goal;
     S.one[w]=S.one[w]||{}; S.one[w].goals=S.one[w].goals||[{},{}];
     S.one[w].goals[i]=S.one[w].goals[i]||{};
@@ -8906,12 +8868,9 @@ function summaryOf(snap){
       Object.keys(x.observed).some(function(k){ return x.observed[k]>0; }); });
   const sc=leaderScore();
   const ones=crewRows().map(function(c){ const r=oneRec(c.name);
-    return (r&&r.date===localDay())
-      ? {name:c.name, wins:r.wins, opps:r.opps, goals:r.goals||[],
-         /* The card as it read at the sit-down, so a market leader is
-            reviewing the conversation against the numbers behind it. */
-         card:scSnapshot(c.name), period:curPeriod(), by:r.by||''}
-      : null;
+    /* The review itself lives in the Consultant Scorecard now. What rides
+       out with the shift is only that the sit-down happened and who held it. */
+    return (r&&r.date===localDay())?{name:c.name, by:r.by||''}:null;
   }).filter(Boolean);
   /* One read, used by the record and by the four numbers the Field Leader App
      pulls out of it. They were reading snap.roster, which never existed:
