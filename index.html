@@ -264,6 +264,16 @@ textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px;
   border-radius:10px;font:inherit;font-size:14px;color:var(--ink);background:var(--card);resize:vertical;}
 .cfoot{display:flex;gap:9px;padding:11px 16px calc(11px + env(safe-area-inset-bottom));
   border-top:1px solid var(--line);background:var(--card);}
+.chead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.cx{flex:0 0 auto;min-width:48px;min-height:48px;border:none;background:none;
+  font:300 30px/1 inherit;color:var(--muted);cursor:pointer;-webkit-appearance:none;}
+.cwhat{margin:0 0 10px;}
+.clater{margin:8px 0 0;font-size:11px;color:var(--muted);text-align:center;}
+.englog .e.held{background:#FDF3E3;border:1px solid #EBD3A6;border-radius:8px;}
+.englog .efin{min-height:44px;padding:0 12px;border:none;border-radius:8px;
+  background:#8A5A14;color:#fff;font:600 12px/1 inherit;cursor:pointer;-webkit-appearance:none;}
+.englog .eedit{min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;color:var(--muted);font:600 12px/1 inherit;cursor:pointer;-webkit-appearance:none;}
 .cskip{flex:0 0 38%;min-height:52px;border:1px solid var(--line);border-radius:10px;
   background:var(--bg);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;}
 .csave{flex:1;min-height:52px;border:none;border-radius:10px;background:var(--navy);
@@ -1101,7 +1111,7 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
   <div id="admbody"></div>
 </div>
 <input type="file" id="csvInput" accept=".csv,.tsv,.txt,.xlsx,.xls,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none">
-<div id="coachwrap"></div>
+<div id="coachwrap" onclick="if(event.target===this) coachLater();"></div>
 <div id="toast"></div>
 <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" multiple>
 
@@ -1217,7 +1227,7 @@ function leadersToday(){
   add(byNow());
   return seen;
 }
-let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{},cash:{},gsres:{},half:{},planback:{}};
+let S={header:{},shift:'',items:{},at:{},by:{},up:{},ex:{},ui:{},aor:{},impact:{},openm:{},eod:{},cancels:[],gsi:[],eng:[],reflect:'',crewin:{},fly:{},one:{},cash:{},gsres:{},half:{},planback:{},coachdraft:null};
 
 /* Engagement types — P2I on the floor, internal and external */
 /* 'presence' is the leader showing up. 'selling' is what the consultant ran
@@ -1643,10 +1653,22 @@ function renderEngLog(){
     if(r)r.textContent=engRate(t.k)+(t.g==='selling'?' of traffic, observed':' of traffic');
   });
   log.innerHTML='';
+  /* A coaching that got interrupted sits at the top until it is finished or
+     dropped, because the alternative is that it quietly never happened. */
+  if(coachDraftLive()){
+    const d=S.coachdraft, r=el('div','e held');
+    r.innerHTML='<time>'+escA(d.at||'')+'</time><span><b>Unfinished coaching</b>'+
+      (d.who?' <em>'+escA(d.who)+'</em>':'')+(d.topic?' <u>'+escA(d.topic)+'</u>':'')+'</span>'+
+      '<button type="button" class="efin" data-cresume="1">Finish</button>'+
+      '<button type="button" data-cdrop="1">×</button>';
+    log.appendChild(r);
+  }
   S.eng.slice().reverse().forEach(e=>{
     const i=S.eng.indexOf(e);
     const r=el('div','e');
-    r.innerHTML=`<time>${escA(e.at)}</time><span>${ENG_NAME[e.t]||e.t}${e.who?` <em>${escA(e.who)}</em>`:''}${e.topic?` <u>${escA(e.topic)}</u>`:''}</span><button type="button" data-engx="${i}">×</button>`;
+    r.innerHTML=`<time>${escA(e.at)}</time><span>${ENG_NAME[e.t]||e.t}${e.who?` <em>${escA(e.who)}</em>`:''}${e.topic?` <u>${escA(e.topic)}</u>`:''}</span>`+
+      (e.t==='assoc'?`<button type="button" class="eedit" data-engedit="${i}">Edit</button>`:'')+
+      `<button type="button" data-engx="${i}">×</button>`;
     log.appendChild(r);
   });
 }
@@ -4385,9 +4407,9 @@ function coachTopics(){
   out.push('Something else');
   return out;
 }
-let COACH={who:'',topic:'',note:'',sug:''};
+let COACH={who:'',topic:'',note:'',sug:'',idx:null};
 function coachOpen(who,sug){
-  COACH={who:who||'',topic:sug||'',note:'',sug:sug||''};
+  COACH={who:who||'',topic:sug||'',note:'',sug:sug||'',idx:null};
   coachRender();
   const w=document.getElementById('coachwrap');
   if(w){ w.classList.add('on'); document.body.style.overflow='hidden'; }
@@ -4400,9 +4422,15 @@ function coachRender(){
   const w=document.getElementById('coachwrap'); if(!w) return;
   const roster=crewOnToday();
   const when=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const editing=(COACH.idx!=null);
   let h='<div class="csheet"><div class="chead">'+
-    '<div><b>Internal P2I</b><span>'+esc(COACH.who||'Coaching touch')+' · '+esc(when)+'</span></div>'+
-    '</div><div class="cbody">';
+    '<div><b>'+(editing?'Edit this coaching':'Fly-by coaching')+'</b><span>'+
+      esc(COACH.who||'Coaching touch')+' · '+esc(when)+'</span></div>'+
+    '<button type="button" class="cx" data-clater="1" aria-label="Close">×</button>'+
+    '</div><div class="cbody">'+
+    (editing?'':'<p class="admnote cwhat">In the moment, on the floor, while the game is '+
+      'being played. Not the Upboard, which fires on a missed cart or three closes in a row, '+
+      'and not the weekly 1-on-1, which is performance.</p>');
 
   /* Logged from the pinned bar there is no name on it yet, and this is where
      it gets one. The chips used to come only from today's roster, so a leader
@@ -4441,9 +4469,15 @@ function coachRender(){
      '<span class="dicthint">'+DICT_HINT+'</span></div>';
 
   h+='</div><div class="cfoot">'+
-     '<button type="button" class="cskip" data-cskip="1">Just log the touch</button>'+
-     '<button type="button" class="csave" data-csave="1">Save the coaching</button>'+
-     '</div></div>';
+     (editing
+       ? '<button type="button" class="cskip" data-clater="1">Back</button>'+
+         '<button type="button" class="csave" data-csave="1">Save changes</button>'
+       : '<button type="button" class="cskip" data-cskip="1">Just log the touch</button>'+
+         '<button type="button" class="csave" data-csave="1">Save the coaching</button>')+
+     '</div>'+
+     (editing?'':'<p class="clater">Called away? Tap ×. Nothing is lost and you can '+
+       'pick it up from the floor log.</p>')+
+     '</div>';
   w.innerHTML=h;
 }
 /* Both buttons log the P2I. The difference is whether it carries a topic. */
@@ -4461,15 +4495,88 @@ function coachCommit(withDetail){
     if(COACH.topic) e.topic=COACH.topic;
     if(String(note||'').trim()) e.note=String(note).trim();
   }
-  S.eng.push(e);
-  if(COACH.who){ const f=S.fly[COACH.who]=S.fly[COACH.who]||{note:'',at:[]};
-    f.at=(f.at||[]).concat([when]); f.by=byNow(); }
+  if(COACH.idx!=null && S.eng[COACH.idx] && S.eng[COACH.idx].t==='assoc'){
+    /* A correction, not a second touch: the time it happened is kept. */
+    const old=S.eng[COACH.idx];
+    e.at=old.at; e.by=old.by||e.by;
+    S.eng[COACH.idx]=e;
+  } else {
+    S.eng.push(e);
+    if(COACH.who){ const f=S.fly[COACH.who]=S.fly[COACH.who]||{note:'',at:[]};
+      f.at=(f.at||[]).concat([when]); f.by=byNow(); }
+  }
+  S.coachdraft=null;
   coachClose();
   render(); save();
-  toast(withDetail&&COACH.topic
-    ? (COACH.who?COACH.who+': ':'')+COACH.topic+' logged'
-    : 'Internal P2I logged');
+  toast(COACH.idx!=null ? 'Coaching updated'
+    : (withDetail&&COACH.topic
+      ? (COACH.who?COACH.who+': ':'')+COACH.topic+' logged'
+      : 'Fly-by logged'));
 }
+/* ── COACHING YOU CAN WALK AWAY FROM ───────────────────────────────────
+   Kris Johnson, GM Crestview, on his day off: "I was conducting a coaching
+   and had to go to help a customer... you can't back out of the coaching
+   screen to use the tablet for anything else, so you're entering a blank or
+   partial screen, and there is no way to go back and edit the coaching."
+
+   He is right twice. The sheet had no way out except logging something, and
+   it locked the page while it was up. And once a touch was logged it was
+   frozen, so a coaching interrupted halfway was either lost or filed wrong.
+
+   Same mistake as the cash keyboard: the tool assumed a leader who finishes
+   what they start. On a floor they do not. A ticket check, an open door and
+   the phone happen at once, and he wrote the list to prove it. So the sheet
+   now closes without costing anything, keeps what was typed, and a logged
+   coaching can be opened again and corrected.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* What is on screen right now, so closing can keep it. */
+function coachGrab(){
+  const e=document.getElementById('coachnote');
+  if(e) COACH.note=e.value;
+  return COACH;
+}
+function coachDraftLive(){
+  const d=S.coachdraft;
+  return !!(d&&(d.who||d.topic||String(d.note||'').trim()));
+}
+/* Leaving is free. The draft is held on the tablet and survives a reload,
+   because the interruption that ends a coaching is rarely a short one. */
+function coachLater(){
+  coachGrab();
+  if(COACH.who||COACH.topic||String(COACH.note||'').trim()){
+    S.coachdraft={who:COACH.who||'', topic:COACH.topic||'', note:COACH.note||'',
+                  sug:COACH.sug||'', idx:(COACH.idx==null?null:COACH.idx),
+                  at:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})};
+  } else { S.coachdraft=null; }
+  coachClose();
+  render(); save();
+  if(S.coachdraft) toast('Held. Pick it back up from the floor log.');
+}
+function coachDrop(){
+  S.coachdraft=null;
+  coachClose();
+  render(); save();
+  toast('Draft dropped.');
+}
+/* Reopen a coaching that was already logged, so a wrong name or a half
+   sentence typed on the way to a guest can be fixed rather than lived with. */
+function coachEdit(i){
+  const e=S.eng[i]; if(!e||e.t!=='assoc') return;
+  COACH={who:e.who||'', topic:e.topic||'', note:e.note||'', sug:'', idx:i};
+  coachRender();
+  const w=document.getElementById('coachwrap');
+  if(w){ w.classList.add('on'); document.body.style.overflow='hidden'; }
+}
+function coachResume(){
+  const d=S.coachdraft; if(!d) return;
+  COACH={who:d.who||'', topic:d.topic||'', note:d.note||'', sug:d.sug||'',
+         idx:(d.idx==null?null:d.idx)};
+  coachRender();
+  const w=document.getElementById('coachwrap');
+  if(w){ w.classList.add('on'); document.body.style.overflow='hidden'; }
+}
+
 /* The last thing coached with someone, for the tag on their card. */
 function lastCoached(name){
   const hits=(S.eng||[]).filter(function(e){ return e.t==='assoc'&&e.who===name&&e.topic; });
@@ -6297,6 +6404,10 @@ document.addEventListener('click',e=>{
     COACH.note=(document.getElementById('coachnote')||{}).value||COACH.note; coachRender(); }
   else if(t.dataset.csave){ coachCommit(true); }
   else if(t.dataset.cskip){ coachCommit(false); }
+  else if(t.dataset.clater){ coachLater(); }
+  else if(t.dataset.cdrop){ coachDrop(); }
+  else if(t.dataset.cresume){ coachResume(); }
+  else if(t.dataset.engedit!=null){ coachEdit(+t.dataset.engedit); }
   else if(t.dataset.cxadd){ S.cancels.push({}); renderCancels(); save(); }
   else if(t.dataset.cxsave!=null){ const c=S.cancels[+t.dataset.cxsave];
     if(!cxReady(c)){ toast('Add the order number or the amount before you save it'); return; }
@@ -6529,6 +6640,7 @@ function adopt(s){
   S.rosterlog=Array.isArray(s.rosterlog)?s.rosterlog:[];
   S.gsres=s.gsres||{};
   S.half=s.half||{}; S.planback=s.planback||{};
+  S.coachdraft=s.coachdraft||null;
   /* Same bug, same place: the cash count was saved and then dropped on the
      way back in. A reloaded tablet lost the morning count, which is the one
      number the closer's over/short is reconciled against. */
@@ -6557,6 +6669,7 @@ function freshDay(src){
   S.shift=''; S.items={}; S.at={}; S.by={}; S.up={}; S.ex={}; S.ui={}; S.aor={}; S.impact={};
   S.openm={}; S.eod={}; S.cancels=[]; S.gsi=[]; S.eng=[]; S.reflect=''; S.crewin={}; S.fly={}; S.one={};
   S.crewout={}; S.crewadd={}; S.rosterlog=[]; S.gsres={}; S.half={}; S.planback={};
+  S.coachdraft=null;
   S.cash=null; cashInit();          /* a new day starts with an uncounted drawer */
   syncHeaderInputs();
   document.getElementById('btn-open').classList.remove('on');
