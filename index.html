@@ -857,6 +857,19 @@ textarea.onein{width:100%;border:1px solid var(--line);border-radius:9px;padding
 .glist{margin:2px 0 10px;padding-left:20px;}
 .glist li{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 9px;}
 .glist li b{color:var(--navy);}
+.onebtns{display:flex;gap:8px;}
+.oneback{flex:0 0 34%;min-height:52px;border:1px solid var(--line);border-radius:10px;
+  background:#fff;font:600 15px/1.1 inherit;color:var(--ink);-webkit-appearance:none;cursor:pointer;}
+.onebtns .onesave{flex:1;}
+.scgrid{display:flex;flex-direction:column;gap:4px;margin:2px 0 12px;}
+.scrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 10px;
+  padding:8px 10px;border-radius:8px;background:#F4F7F7;border:1px solid var(--line);}
+.scrow span{font-size:13px;color:var(--ink);}
+.scrow b{font-size:15px;white-space:nowrap;text-align:right;}
+.scrow i{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--muted);}
+.scrow.ok{background:#E6F4EC;border-color:#BBDFCB;}
+.scrow.warn{background:#FDF3E3;border-color:#EBD3A6;}
+.scrow.bad{background:#FBEDE8;border-color:#E9BFAE;}
 .grp.gsopen h2{background:#7A3B16;}
 .grp.planback h2{background:var(--navy2);}
 .grp.half h2{background:var(--navy);}
@@ -3896,7 +3909,7 @@ function gv(k){
 }
 const T={sph:400,finSales:55,finOrders:45,appsTraffic:10,protAttach:60,margin:55,
          /* consultant goals, from the Consultant Scorecard's DEFAULT_GOALS.standard */
-         cSph:400, cMinSph:250, cMinSphOutlet:150,
+         cSph:400, cMinSph:250, cMinSphOutlet:150, cNet:46648,
          cAvgTicket:2200, cEffMargin:55.5, cFin:65, cApps:18,
          cBedPct:20, cBedSph:60, cProtPct:8, cProtSph:32, cProtAttach:60,
          cDelPct:8, cCancelPct:4, cDiscPct:12};
@@ -4335,6 +4348,95 @@ function oneDueLine(crew){
     '<em>'+esc(due.map(function(c){ return c.name; }).slice(0,3).join(', '))+
     (due.length>3?' and '+(due.length-3)+' more':'')+'</em></span><i>Start &#9656;</i></button>';
 }
+/* ── THE WEEKLY SCORECARD, INSIDE THE 1-ON-1 ───────────────────────────
+   Stedman Ellington asked what the One-on-One section was for. Frank's
+   answer: weekly coaching, the weekly scorecard review. Which means this
+   panel has to be the scorecard, not a version of it.
+
+   So the thirteen metrics below are the Consultant Scorecard's own
+   CONSULTANT_METRICS, in its order, with its labels, scored against its
+   DEFAULT_GOALS. Nothing here is a second framework and nothing here is a
+   number of mine. A consultant signing in to the Scorecard and a leader
+   sitting down with them in here are reading the same card.
+
+   The completed review rides out on the shift record, so a market leader
+   reads it in the Field Leader App the next morning along with everything
+   else from that shift. There is no print. Frank's call: it goes up, it
+   does not go on paper.
+   ──────────────────────────────────────────────────────────────────────── */
+const SC_PCT={margin:1,finpct:1,bedpct:1,protpct:1,delpct:1,cancelpct:1,discpct:1};
+function scNum(c,k){
+  const v=SC_PCT[k]?pctNum(c[k]):num(c[k]);
+  /* A share past 100 is arithmetic on a near-empty period, not performance,
+     and the card already refuses to score those elsewhere. */
+  if(v!=null&&SC_PCT[k]&&(v<0||v>100)) return null;
+  return v;
+}
+function scRows(){
+  return [
+    {k:'net',       lbl:'Net Sales',         goal:T.cNet,       unit:'$', dec:0, per:'month'},
+    {k:'sph',       lbl:'Sales / Hour',      goal:T.cSph,       unit:'$', dec:0, floor:minSph()},
+    {k:'ticket',    lbl:'Avg Ticket w/ Del', goal:T.cAvgTicket, unit:'$', dec:0},
+    {k:'margin',    lbl:'Eff. Margin',       goal:T.cEffMargin, unit:'%', dec:1},
+    {k:'finpct',    lbl:'Finance %',         goal:T.cFin,       unit:'%', dec:1},
+    {k:'apps',      lbl:'Credit Apps',       goal:T.cApps,      unit:'',  dec:0, per:'month'},
+    {k:'bedpct',    lbl:'Bedding %',         goal:T.cBedPct,    unit:'%', dec:1},
+    {k:'bedsph',    lbl:'Bedding / Hour',    goal:T.cBedSph,    unit:'$', dec:0},
+    {k:'protpct',   lbl:'Protection %',      goal:T.cProtPct,   unit:'%', dec:1},
+    {k:'protsph',   lbl:'Protection / Hour', goal:T.cProtSph,   unit:'$', dec:0},
+    {k:'delpct',    lbl:'Delivery %',        goal:T.cDelPct,    unit:'%', dec:1},
+    {k:'cancelpct', lbl:'Cancellation %',    goal:T.cCancelPct, unit:'%', dec:1, lower:1},
+    {k:'discpct',   lbl:'Discount %',        goal:T.cDiscPct,   unit:'%', dec:1, lower:1}
+  ];
+}
+/* A monthly goal only means something against a month. On yesterday or the
+   week the figure is shown and left unscored rather than compared to a
+   number it cannot reach. */
+function scMonthOk(){ return curPeriod()==='crew'; }
+function scStat(r,v){
+  if(v==null||r.goal==null) return '';
+  if(r.per==='month'&&!scMonthOk()) return '';
+  if(r.lower) return (v<=r.goal)?'ok':'bad';
+  if(r.floor!=null) return (v>=r.goal)?'ok':((v>=r.floor)?'warn':'bad');
+  return (v>=r.goal)?'ok':'bad';
+}
+function scCard(c){
+  return scRows().map(function(r){
+    const v=scNum(c,r.k);
+    return {k:r.k, lbl:r.lbl, v:(v==null?null:v), txt:(v==null?'—':fmtMet(v,r)),
+            goal:r.goal, goalTxt:(r.goal==null?'':fmtMet(r.goal,r)),
+            floor:(r.floor==null?null:r.floor), lower:!!r.lower,
+            per:(r.per||''), status:scStat(r,v)};
+  });
+}
+function scGrid(c){
+  const rows=scCard(c), per=PERIODS.filter(function(p){ return p[0]===curPeriod(); })[0];
+  const miss=rows.filter(function(x){ return x.v==null; }).length;
+  let h='<div class="sub3">The scorecard<em>'+esc(per?per[1]:'')+'</em></div><div class="scgrid">';
+  rows.forEach(function(x){
+    const unscored=(x.per==='month'&&!scMonthOk());
+    h+='<div class="scrow'+(x.status?' '+x.status:'')+'">'+
+       '<span>'+esc(x.lbl)+'</span><b>'+esc(x.txt)+'</b>'+
+       '<i>'+(x.goalTxt
+          ? (unscored?('goal '+esc(x.goalTxt)+' a month')
+             :((x.lower?'at or under ':'goal ')+esc(x.goalTxt)+
+               (x.floor!=null?(', floor '+fmtMet(x.floor,{unit:'$',dec:0})):'')))
+          :'no goal set')+'</i></div>';
+  });
+  h+='</div>';
+  if(miss) h+='<p class="admnote">'+miss+' of 13 are blank because the loaded '+
+    'consultant report does not carry that column. A blank is a gap in the file, not a zero.</p>';
+  return h;
+}
+/* What goes up with the shift so a market leader can see what was reviewed,
+   not just that a sit-down happened. */
+function scSnapshot(name){
+  const c=crewRows().filter(function(x){ return x.name===name; })[0];
+  if(!c) return [];
+  return scCard(c).filter(function(x){ return x.v!=null; })
+    .map(function(x){ return {k:x.k, lbl:x.lbl, v:x.txt, goal:x.goalTxt, status:x.status}; });
+}
+
 function buildOneOnOne(c,coach){
   const nm=c.name, id=flyKey(nm), open=(S.ui['one-'+id]==='open');
   const d=oneoneDaysAgo(nm), due=oneDue(nm), rec=oneRec(nm)||{};
@@ -4349,8 +4451,10 @@ function buildOneOnOne(c,coach){
   const mets=goalMetrics(c);
   const g=draft.goals||rec.goals||[{},{}];
   h+='<div class="onepad">';
-  /* The weekly sit-down opens on the rolling number, not on yesterday. */
+  /* The weekly sit-down opens on the rolling number, then the card itself,
+     because the review is the card. */
   h+=rollLine(nm);
+  h+=scGrid(c);
   h+='<div class="sub3">Celebrate</div>'+
      '<textarea class="onein" id="ow-'+id+'" data-one1="wins" data-who="'+escA(nm)+'" '+
      'placeholder="What they did well, in your words">'+escA(draft.wins!=null?draft.wins:(rec.wins||cap(coach.win||'')))+'</textarea>'+
@@ -4378,9 +4482,17 @@ function buildOneOnOne(c,coach){
          '" placeholder="How. The behavior that gets them there, not the number again.">'+escA(gg.how)+'</textarea>'+
        dictRow('#gh-'+id+'-'+i)+'</div>';
   });
-  h+='<p class="briefsrc" style="margin:0 0 10px">Coaching lives in the Scorecard, where '+esc(nm.split(',')[0])+
-     ' can sign in and see it. Use this when you are offline, or to record that the sit-down happened.</p>'+
-     '<button type="button" class="onesave" data-onesave="'+escA(nm)+'">Save the 1-on-1</button>';
+  h+='<p class="briefsrc" style="margin:0 0 10px">Saved here and sent up with this shift, '+
+     'so your market leader reads the review the next morning. '+esc(nm.split(',')[0])+
+     ' can still sign in to the Scorecard to see their own card.</p>'+
+     '<div class="onebtns">'+
+       /* Thirteen metrics, two write-ups and two goal boxes above this, so the
+          only way out used to be a long scroll back to the toggle at the top.
+          Back is here, and it costs nothing: every field writes as it is typed. */
+       '<button type="button" class="oneback" data-one="'+escA(nm)+'">\u2190 Back</button>'+
+       '<button type="button" class="onesave" data-onesave="'+escA(nm)+'">Save the 1-on-1</button>'+
+     '</div>'+
+     '<p class="clater">Back keeps everything you have typed. Nothing is lost.</p>';
   if(rec.date) h+='<p class="briefsrc">Last saved '+esc(fmtMDY(rec.date))+
     (rec.by?' by '+esc(rec.by):'')+'.</p>';
   h+='</div>';
@@ -8794,7 +8906,12 @@ function summaryOf(snap){
       Object.keys(x.observed).some(function(k){ return x.observed[k]>0; }); });
   const sc=leaderScore();
   const ones=crewRows().map(function(c){ const r=oneRec(c.name);
-    return (r&&r.date===localDay())?{name:c.name, wins:r.wins, opps:r.opps, goals:r.goals||[]}:null;
+    return (r&&r.date===localDay())
+      ? {name:c.name, wins:r.wins, opps:r.opps, goals:r.goals||[],
+         /* The card as it read at the sit-down, so a market leader is
+            reviewing the conversation against the numbers behind it. */
+         card:scSnapshot(c.name), period:curPeriod(), by:r.by||''}
+      : null;
   }).filter(Boolean);
   /* One read, used by the record and by the four numbers the Field Leader App
      pulls out of it. They were reading snap.roster, which never existed:
